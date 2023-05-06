@@ -132,10 +132,10 @@ class GameManager:
 
     def tryMoveActiveTankDown(self):
         return self.tryMoveActiveTank(0, 1)
-    
+
     def tryMoveActiveTank(self, deltaX, deltaY):
         if self.canMoveActiveTank(deltaX, deltaY):
-            self.moveActiveTank (deltaX, deltaY)
+            self.moveActiveTank(deltaX, deltaY)
             return True
         return False
 
@@ -146,6 +146,16 @@ class GameManager:
         return False
 
     def tryShootOrDonate(self, targetIndex, isShoot):
+        success = self.canShootOrDonate(targetIndex)
+        if success:
+            target = self.getAllTanks()[targetIndex]
+            if isShoot:
+                self.shoot(target)
+            else:
+                self.donateTo(target)
+        return success
+
+    def canShootOrDonate(self, targetIndex):
         success = False
         activeTank = self.getActiveTank()
         if (not self.getActiveTankHasActionPoints()):
@@ -153,12 +163,8 @@ class GameManager:
         target = self.getAllTanks()[targetIndex]
         dist = self.boxDistance((target.x, target.y),
                                 (activeTank.x, activeTank.y))
-        if (dist > 0 and dist <= activeTank.range):
+        if (dist > 0 and dist <= activeTank.range and target.isAlive):
             success = True
-            if isShoot:
-                self.shoot(target)
-            else:
-                self.donateTo(target)
         return success
 
     def shoot(self, t):

@@ -21,9 +21,9 @@ NUM_TANK_SPEC_COMMANDS = 2
 class BlindMapper:
     def __init__(self, manager):
         self.gameManager = manager
-        self.gameStatus = self.getStatus()
+        gameStatus = self.getStatus()
         self.highestCmdIndex = FIRST_TANK_SPECIFIC_COMMAND + \
-            (self.gameStatus.numTanks * NUM_TANK_SPEC_COMMANDS) - 1
+            (gameStatus.numTanks * NUM_TANK_SPEC_COMMANDS) - 1
 
     def getStatus(self):
         gameStatus = jsonpickle.decode(self.gameManager.getFullGameStatus())
@@ -49,17 +49,12 @@ class BlindMapper:
             # the last command that the tank can do to
             # itself (like move). Donating to tank[0]
             # will immediately follow.
-            for t in self.gameStatus.getAllTanks():
-                if (cmdIndex ==
-                    t.index * NUM_TANK_SPEC_COMMANDS +
-                    FIRST_TANK_SPECIFIC_COMMAND +
-                        SHOOT_THIS_TANK_CMD):
+            gameStatus = self.getStatus()
+            for t in gameStatus.getAllTanks():
+                if (cmdIndex == self.getShootCmdIndex(t.index)):
                     print(f'Shoot tank {t.index}')
                     return True
-                elif (cmdIndex ==
-                      t.index * NUM_TANK_SPEC_COMMANDS +
-                      FIRST_TANK_SPECIFIC_COMMAND +
-                        DONATE_TO_THIS_TANK_CMD):
+                elif (cmdIndex == self.getDonateCmdIndex(t.index)):
                     print(f'Donate to tank {t.index}')
                     return True
             # return False if no case was hit. Will probably need more codes here
@@ -67,18 +62,48 @@ class BlindMapper:
         return True
 
     def getActionValidations(self):
-        activeGameStatus = self.getStatus()
-        activeTank = activeGameStatus.getActiveTank()
+        gameStatus = self.getStatus()
+        activeTank = gameStatus.getActiveTank()
         # Check for all valid actions for current active tank.
         # This will be an array of bools if the corresponding
         # action from above can be done.
         # Intialize the list of all possible actions
         isValid = [None] * (self.highestCmdIndex + 1)
-        
+
         # Can Pass
         isValid[PASS_CMD] = True
 
-        #region Can Move
-        
-        #endregion
+        # Can Move
+        isValid[MOVE_RIGHT_CMD] = gameStatus.canMoveActiveTank(1, 0)
+        isValid[MOVE_LEFT_CMD] = gameStatus.canMoveActiveTank(-1, 0)
+        isValid[MOVE_UP_CMD] = gameStatus.canMoveActiveTank(0, -1)
+        isValid[MOVE_DOWN_CMD] = gameStatus.canMoveActiveTank(0, 1)
 
+        # Can Increase Range
+        isValid[INCREASE_RANGE_CMD] = True
+
+        # region "To other tank" commands
+        # The ability to shoot and donate both are based on the range
+        # of the active tank, so they should always be the same. You
+        # can't shoot or donate to yourself.
+        for t in gameStatus.getAllTanks():
+            canHit = False
+            if (t.index is not activeTank.index):
+                canHit = gameStatus.canShootOrDonate(t.index)
+
+            isValid[self.getShootCmdIndex(t.index)] = canHit
+            isValid[self.getDonateCmdIndex(t.index)] = canHit
+        # endregion
+        return isValid
+
+    # region Helpers
+    def getShootCmdIndex(self, tankIndex):
+        return tankIndex * NUM_TANK_SPEC_COMMANDS + \
+            FIRST_TANK_SPECIFIC_COMMAND + \
+            SHOOT_THIS_TANK_CMD
+
+    def getDonateCmdIndex(self, tankIndex):
+        return tankIndex * NUM_TANK_SPEC_COMMANDS + \
+            FIRST_TANK_SPECIFIC_COMMAND + \
+            DONATE_TO_THIS_TANK_CMD
+    # endregion
