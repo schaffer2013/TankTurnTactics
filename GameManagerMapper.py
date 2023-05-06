@@ -20,7 +20,7 @@ class OmnipotentMapper:
         column = pos[0] // (self.WIDTH + self.MARGIN)
         row = pos[1] // (self.HEIGHT + self.MARGIN)
         if self.isActiveArmed:
-            self.gameManager.tryShoot((column, row))
+            self.gameManager.tryShootXY((column, row))
 
     def mapKeyboardEvent(self, event):
         if (event.type == pygame.KEYDOWN and event.key == pygame.K_p):

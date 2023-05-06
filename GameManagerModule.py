@@ -140,18 +140,10 @@ class GameManager:
         return False
 
     def tryShootXY(self, xy):
-        success = False
-        t = self.getActiveTank()
-        if (not self.getActiveTankHasActionPoints()):
-            return False
-        for i in self.getInactiveTanksCopy():
-            if (i.x == xy[0] and i.y == xy[1]):
-                dist = self.boxDistance((xy[0], xy[1]), (t.x, t.y))
-                if (dist > 0 and dist <= t.range):
-                    success = True
-                    self.shoot(i)
-                    break
-        return success
+        for target in self.getInactiveTanksCopy():
+            if (target.x == xy[0] and target.y == xy[1]):
+                return self.tryShootOrDonate(target.index, True)
+        return False
 
     def tryShootOrDonate(self, targetIndex, isShoot):
         success = False
@@ -164,9 +156,9 @@ class GameManager:
         if (dist > 0 and dist <= activeTank.range):
             success = True
             if isShoot:
-                self.shoot(targetIndex)
+                self.shoot(target)
             else:
-                self.donateTo(targetIndex)
+                self.donateTo(target)
         return success
 
     def shoot(self, t):
