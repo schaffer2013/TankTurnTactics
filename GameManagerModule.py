@@ -71,6 +71,9 @@ class GameManager:
         else:
             self.increaseActiveTankIndex()
 
+    def increaseTankActionPoints(self, tankIndex):
+        self.getAllTanks[tankIndex].actionPoints += 1
+
     def increaseActiveTankActionPoints(self):
         self.getActiveTank().actionPoints += 1
 
@@ -127,7 +130,7 @@ class GameManager:
     def tryMoveActiveTankDown(self):
         return self.moveActiveTank(0, 1)
 
-    def tryShoot(self, xy):
+    def tryShootXY(self, xy):
         success = False
         t = self.getActiveTank()
         if (not self.getActiveTankHasActionPoints()):
@@ -141,6 +144,21 @@ class GameManager:
                     break
         return success
 
+    def tryShootOrDonate(self, targetIndex, isShoot):
+        success = False
+        activeTank = self.getActiveTank()
+        if (not self.getActiveTankHasActionPoints()):
+            return False
+        target = self.getAllTanks()[targetIndex]
+        dist = self.boxDistance((target.x, target.y), (activeTank.x, activeTank.y))
+        if (dist > 0 and dist <= activeTank.range):
+            success = True
+            if isShoot:
+                self.shoot(targetIndex)
+            else:
+                self.donateTo(targetIndex)
+        return success
+
     def shoot(self, t):
         if (t.extra_lives == 0):
             t.isAlive = False
@@ -148,6 +166,14 @@ class GameManager:
                 self.isAWin = True
         else:
             t.extra_lives -= 1
+        self.decreaseActiveTankActionPoints()
+    
+    def donateTo(self, targetIndex):
+        self.increaseTankActionPoints(targetIndex)
+        self.decreaseActiveTankActionPoints()
+
+    def increaseActiveTankRange(self):
+        self.getActiveTank().range += 1
         self.decreaseActiveTankActionPoints()
 
     def manhattanDistance(self, xy1, xy2):
