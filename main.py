@@ -16,6 +16,9 @@ MARGIN = 5
 GRID_DIM_X = 10
 GRID_DIM_Y = 10
 
+# Number of initial tanks
+NUM_TANKS = 2
+
 # Create a 2 dimensional array. A two dimensional
 # array is simply a list of lists.
 grid = []
@@ -43,7 +46,7 @@ done = False
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
 
-manager = GameManagerModule.GameManager(GRID_DIM_X, GRID_DIM_Y, 5)
+manager = GameManagerModule.GameManager(GRID_DIM_X, GRID_DIM_Y, NUM_TANKS)
 mapper = GameManagerMapper.KeyboardMapper(manager)
 
 # -------- Main Program Loop -----------
@@ -131,6 +134,8 @@ while not done:
 
     # Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
+
+    done = manager.isAWin
 
 # Be IDLE friendly. If you forget this line, the program will 'hang'
 # on exit.

@@ -142,7 +142,7 @@ class GameManager:
     def shoot(self, t):
         if (t.extra_lives == 0):
             t.isAlive = False
-            if (len(self.getAliveTanks()) <= 0):
+            if (len(self.getAliveTanks()) <= 1):
                 self.isAWin = True
         else:
             t.extra_lives -= 1
