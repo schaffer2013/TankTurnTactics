@@ -100,7 +100,7 @@ class GameManager:
                     shootableSpots.append((c, r))
         return shootableSpots
 
-    def moveActiveTank(self, deltaX, deltaY):
+    def canMoveActiveTank(self, deltaX, deltaY):
         t = self.getActiveTank()
         tempNewX = t.x + deltaX
         tempNewY = t.y + deltaY
@@ -113,22 +113,31 @@ class GameManager:
         for i in inactives:
             if (i.x == tempNewX and i.y == tempNewY):
                 return False
-        t.x = tempNewX
-        t.y = tempNewY
-        self.decreaseActiveTankActionPoints()
         return True
 
+    def moveActiveTank(self, deltaX, deltaY):
+        activeTank = self.getActiveTank()
+        activeTank.x += deltaX
+        activeTank.y += deltaY
+        self.decreaseActiveTankActionPoints()
+
     def tryMoveActiveTankRight(self):
-        return self.moveActiveTank(1, 0)
+        return self.tryMoveActiveTank(1, 0)
 
     def tryMoveActiveTankLeft(self):
-        return self.moveActiveTank(-1, 0)
+        return self.tryMoveActiveTank(-1, 0)
 
     def tryMoveActiveTankUp(self):
-        return self.moveActiveTank(0, -1)
+        return self.tryMoveActiveTank(0, -1)
 
     def tryMoveActiveTankDown(self):
-        return self.moveActiveTank(0, 1)
+        return self.tryMoveActiveTank(0, 1)
+    
+    def tryMoveActiveTank(self, deltaX, deltaY):
+        if self.canMoveActiveTank(deltaX, deltaY):
+            self.moveActiveTank (deltaX, deltaY)
+            return True
+        return False
 
     def tryShootXY(self, xy):
         success = False
@@ -150,7 +159,8 @@ class GameManager:
         if (not self.getActiveTankHasActionPoints()):
             return False
         target = self.getAllTanks()[targetIndex]
-        dist = self.boxDistance((target.x, target.y), (activeTank.x, activeTank.y))
+        dist = self.boxDistance((target.x, target.y),
+                                (activeTank.x, activeTank.y))
         if (dist > 0 and dist <= activeTank.range):
             success = True
             if isShoot:
@@ -167,7 +177,7 @@ class GameManager:
         else:
             t.extra_lives -= 1
         self.decreaseActiveTankActionPoints()
-    
+
     def donateTo(self, targetIndex):
         self.increaseTankActionPoints(targetIndex)
         self.decreaseActiveTankActionPoints()
