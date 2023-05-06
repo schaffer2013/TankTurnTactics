@@ -1,25 +1,27 @@
 from Tank import Tank
 import random
+import jsonpickle
 
-# Add tanks
-AllTanks=[]
 
 class GameManager:
     def __init__(self, DIM_X, DIM_Y, numOfTanks):
         self.isAWin = False
+        self.numTanks = numOfTanks
+        self.AllTanks = []
 
+        # Add tanks
         for i in range(numOfTanks):
             overlap = True
             while (overlap):
                 overlap = False
                 x = random.randint(0, DIM_X - 1)
                 y = random.randint(0, DIM_Y - 1)
-                for t in AllTanks:
+                for t in self.AllTanks:
                     if (t.x == x and t.y == y):
                         overlap = True
                         break
                 if (not overlap):
-                    AllTanks.append(Tank(len(AllTanks), x, y))
+                    self.AllTanks.append(Tank(len(self.AllTanks), x, y))
 
         self.setActiveTankIndex(-1)
         self.increaseActiveTankIndex()
@@ -28,27 +30,27 @@ class GameManager:
         self.dimY = DIM_Y
 
     def getAllTanks(self):
-        return AllTanks
-    
+        return self.AllTanks
+
     def getAliveTanks(self):
         aliveTanks = []
-        for t in AllTanks:
+        for t in self.AllTanks:
             if t.isAlive:
                 aliveTanks.append(t)
         return aliveTanks
-    
+
     def getActiveTank(self):
         return self.getAllTanks()[self.activeTankIndex]
-    
+
     def getInactiveTanksCopy(self):
         c = self.getAllTanks().copy()
         del c[self.activeTankIndex]
         return c
-    
+
     def getInactiveAliveTanksCopy(self):
         c = self.getAllTanks().copy()
         del c[self.activeTankIndex]
-        newArray=[]
+        newArray = []
         for t in c:
             if t.isAlive:
                 newArray.append(t)
@@ -76,15 +78,15 @@ class GameManager:
         self.getActiveTank().actionPoints -= 1
         if self.getActiveTank().actionPoints <= 0:
             self.increaseActiveTankIndex()
-    
+
     def setActiveTank(self):
         for t in self.getAllTanks():
             t.isActive = False
         self.getActiveTank().isActive = True
-    
+
     def getActiveTankHasActionPoints(self):
         return self.getActiveTank().actionPoints > 0
-    
+
     def getShootableSpots(self):
         t = self.getActiveTank()
         shootableSpots = []
@@ -103,7 +105,7 @@ class GameManager:
             return False
         if (tempNewY >= self.dimY or tempNewY < 0):
             return False
-        
+
         inactives = self.getInactiveAliveTanksCopy()
         for i in inactives:
             if (i.x == tempNewX and i.y == tempNewY):
@@ -112,19 +114,19 @@ class GameManager:
         t.y = tempNewY
         self.decreaseActiveTankActionPoints()
         return True
-    
+
     def tryMoveActiveTankRight(self):
         return self.moveActiveTank(1, 0)
 
     def tryMoveActiveTankLeft(self):
         return self.moveActiveTank(-1, 0)
-    
+
     def tryMoveActiveTankUp(self):
         return self.moveActiveTank(0, -1)
-    
+
     def tryMoveActiveTankDown(self):
         return self.moveActiveTank(0, 1)
-    
+
     def tryShoot(self, xy):
         success = False
         t = self.getActiveTank()
@@ -138,7 +140,7 @@ class GameManager:
                     self.shoot(i)
                     break
         return success
-    
+
     def shoot(self, t):
         if (t.extra_lives == 0):
             t.isAlive = False
@@ -147,9 +149,13 @@ class GameManager:
         else:
             t.extra_lives -= 1
         self.decreaseActiveTankActionPoints()
-    
+
     def manhattanDistance(self, xy1, xy2):
         return abs(xy1[0]-xy2[0]) + abs(xy1[1]-xy2[1])
-    
+
     def boxDistance(self, xy1, xy2):
         return max(abs(xy1[0]-xy2[0]), abs(xy1[1]-xy2[1]))
+
+    def getFullGameStatus(self):
+        jsonStr = jsonpickle.encode(self)
+        return (jsonStr)

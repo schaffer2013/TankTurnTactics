@@ -1,5 +1,5 @@
 import pygame
-import copy
+import jsonpickle
 from Tank import Tank
 import GameManagerModule
 import ScreenHelper
@@ -47,23 +47,18 @@ done = False
 clock = pygame.time.Clock()
 
 manager = GameManagerModule.GameManager(GRID_DIM_X, GRID_DIM_Y, NUM_TANKS)
-mapper = GameManagerMapper.KeyboardMapper(manager)
+mapper = GameManagerMapper.OmnipotentMapper(manager, WIDTH, HEIGHT, MARGIN)
 
 # -------- Main Program Loop -----------
 while not done:
+    gameStatus = jsonpickle.decode(manager.getFullGameStatus())
     for event in pygame.event.get():  # User did something
         if event.type == pygame.QUIT:  # If user clicked close
             done = True  # Flag that we are done so we exit this loop
         if (event.type == pygame.KEYDOWN):
             mapper.mapKeyboardEvent(event)
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            # User clicks the mouse. Get the position
-            pos = pygame.mouse.get_pos()
-            # Change the x/y screen coordinates to grid coordinates
-            column = pos[0] // (WIDTH + MARGIN)
-            row = pos[1] // (HEIGHT + MARGIN)
-            if mapper.isActiveArmed:
-                manager.tryShoot((column, row))
+            mapper.mapMouseEvent(event)
 
     # Set the screen background
     screen.fill(ScreenHelper.BLACK)
@@ -75,11 +70,12 @@ while not done:
             ScreenHelper.drawCell(c, r, color, screen, MARGIN, HEIGHT, WIDTH)
 
     if mapper.isActiveArmed:
-        for s in manager.getShootableSpots():
+        for s in gameStatus.getShootableSpots():
             color = ScreenHelper.LIGHT_GRAY
-            ScreenHelper.drawCell(s[0], s[1], color, screen, MARGIN, HEIGHT, WIDTH)
-    
-    for t in manager.getAliveTanks():
+            ScreenHelper.drawCell(
+                s[0], s[1], color, screen, MARGIN, HEIGHT, WIDTH)
+
+    for t in gameStatus.getAliveTanks():
         color = ScreenHelper.INACTIVE
         if t.isActive:
             color = ScreenHelper.ACTIVE
@@ -92,24 +88,24 @@ while not done:
         tempY = (MARGIN + HEIGHT) * t.y + MARGIN
         # Index Render
         ScreenHelper.displayText(screen,
-                                    font,
-                                    str(t.actionPoints),
-                                    tempX + int(3*WIDTH/4),
-                                    tempY + int(HEIGHT/4))
-        
+                                 font,
+                                 str(t.actionPoints),
+                                 tempX + int(3*WIDTH/4),
+                                 tempY + int(HEIGHT/4))
+
         # Action point render
         ScreenHelper.displayText(screen,
-                                    font,
-                                    str(t.index),
-                                    tempX + int(WIDTH/4),
-                                    tempY + int(HEIGHT/4))
-        
+                                 font,
+                                 str(t.index),
+                                 tempX + int(WIDTH/4),
+                                 tempY + int(HEIGHT/4))
+
         # Range Render
         ScreenHelper.displayText(screen,
-                                    font,
-                                    str(t.range),
-                                    tempX + int(WIDTH/2),
-                                    tempY + int(3*HEIGHT/4))
+                                 font,
+                                 str(t.range),
+                                 tempX + int(WIDTH/2),
+                                 tempY + int(3*HEIGHT/4))
 
         # Extra Live Render
         circleLeft = tempX
@@ -118,15 +114,15 @@ while not done:
         circleRadius = min(WIDTH/3, HEIGHT/3)/2
         if (t.extra_lives > 0):
             ScreenHelper.drawRedCircle(screen,
-                (circleLeft, circleBottom),
-                circleRadius,
-                draw_top_right=True)
+                                       (circleLeft, circleBottom),
+                                       circleRadius,
+                                       draw_top_right=True)
         if (t.extra_lives > 1):
             ScreenHelper.drawRedCircle(screen,
-                (circleRight, circleBottom),
-                circleRadius,
-                draw_top_left=True)
-                            
+                                       (circleRight, circleBottom),
+                                       circleRadius,
+                                       draw_top_left=True)
+
             # endregion
 
     # Limit to 60 frames per second
@@ -135,7 +131,7 @@ while not done:
     # Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
 
-    done = manager.isAWin
+    done = done or manager.isAWin
 
 # Be IDLE friendly. If you forget this line, the program will 'hang'
 # on exit.
