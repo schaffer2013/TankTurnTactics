@@ -7,19 +7,21 @@ import AutoClientManager
 
 HANDS_ON = False
 
+# Grid dimensions
+GRID_DIM_X = 30
+GRID_DIM_Y = 30
+
 # This sets the WIDTH and HEIGHT of each grid location
-WIDTH = 45
-HEIGHT = 45
+TOTAL_WIDTH = 1000
+TOTAL_HEIGHT = 800
+WIDTH = int(TOTAL_WIDTH/GRID_DIM_X)
+HEIGHT = int(TOTAL_HEIGHT/GRID_DIM_Y)
 
 # This sets the margin between each cell
-MARGIN = 5
-
-# Grid dimensions
-GRID_DIM_X = 10
-GRID_DIM_Y = 10
+MARGIN = int(min(WIDTH, HEIGHT)/10)
 
 # Number of initial tanks
-NUM_TANKS = 25
+NUM_TANKS = 90
 
 # Create a 2 dimensional array. A two dimensional
 # array is simply a list of lists.
@@ -48,7 +50,8 @@ done = False
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
 timeSinceLastMove = 0
-MOVE_DELAY = 300  # ms
+MOVE_DELAY = 100  # ms
+PAUSE_DELAY = MOVE_DELAY * 2
 
 manager = GameManagerModule.GameManager(GRID_DIM_X, GRID_DIM_Y, NUM_TANKS)
 inputMapper = GameManagerMapper.OmnipotentMapper(
@@ -70,9 +73,12 @@ while not done:
                 inputMapper.mapMouseEvent(event)
     if not HANDS_ON:
         timeSinceLastMove += clock.get_time()
-        if (timeSinceLastMove > MOVE_DELAY):
-            timeSinceLastMove = 0
+
+        if (timeSinceLastMove > MOVE_DELAY and not manager.isPaused):
             autoClientManager.makeAutoDecision()
+        if (timeSinceLastMove > MOVE_DELAY + PAUSE_DELAY and manager.isPaused):
+            manager.resume()
+            timeSinceLastMove = 0
 
     # Set the screen background
     screen.fill(ScreenHelper.BLACK)
