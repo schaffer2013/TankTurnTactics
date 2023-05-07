@@ -23,6 +23,6 @@ Each "tank" is represented with a rectangle. The important features are:
 
 ## Gameplay
 This currently auto-plays based on separate, but unlearning Neural Networks. Taken at [this commit](https://github.com/schaffer2013/TankTurnTactics/commit/5b010eb0f10aac5dfa515b281ae16cdbb280215a).
-The output of the NN gives a list of weighted action choices, which gets randomly chosen based on weight (the "better" the option, the higher chance it has to get chosen). If weighted-random choice (WRC) is an illegal move (trying to move to an occupied spot, shooting a dead or out-of-range tank, etc), the agent is forced to choose "Wither" as a punishment. 
+The output of the NN gives a list of weighted action choices, which gets randomly chosen based on weight (the "better" the option, the higher chance it has to get chosen). If weighted-random choice (WRC) is an illegal move (trying to move to an occupied spot, shooting a dead or out-of-range tank, etc), the agent is forced to choose "Wither" as a punishment. With this example, the "Wither percentage" over all actions chosen was over 72%. This key metric should quickly drop as closed-loop training happens.
 
 ![tankturns_nn](https://user-images.githubusercontent.com/9828010/236706222-56200bc2-b24b-47f7-9916-1cc8327d634e.gif)
