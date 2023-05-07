@@ -160,6 +160,8 @@ while not done:
     done = done or manager.isAWin
     if manager.isAWin:
         print(f'Tank {manager.winningTank} wins!')
+        print("Wither percentage: %.2f" %
+              (manager.getWitherPercentage()*100.0))
 
 # Be IDLE friendly. If you forget this line, the program will 'hang'
 # on exit.
