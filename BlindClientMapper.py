@@ -6,9 +6,10 @@ MOVE_LEFT_CMD = 2
 MOVE_UP_CMD = 3
 MOVE_DOWN_CMD = 4
 INCREASE_RANGE_CMD = 5
+WITHER_CMD = 6
 
 # Using this as a placeholder
-FIRST_TANK_SPECIFIC_COMMAND = INCREASE_RANGE_CMD + 1
+FIRST_TANK_SPECIFIC_COMMAND = WITHER_CMD + 1
 
 # All commnds that can be done to a tank
 SHOOT_THIS_TANK_CMD = 0
@@ -48,6 +49,9 @@ class BlindMapper:
             self.gameManager.tryMoveActiveTankDown()
         elif (cmdIndex == INCREASE_RANGE_CMD):
             print("Increase Range")
+            self.gameManager.increaseActiveTankRange()
+        elif (cmdIndex == WITHER_CMD):
+            print("Wither")
             self.gameManager.increaseActiveTankRange()
         else:
             # For these tank specific commands,
@@ -89,6 +93,9 @@ class BlindMapper:
 
         # Can Increase Range
         isValid[INCREASE_RANGE_CMD] = True
+
+        # Can Wither
+        isValid[WITHER_CMD] = True
 
         # region "To other tank" commands
         # The ability to shoot and donate both are based on the range

@@ -198,6 +198,9 @@ class GameManager:
         self.getActiveTank().range += 1
         self.decreaseActiveTankActionPoints()
 
+    def witherActiveTank(self):
+        self.decreaseActiveTankActionPoints()
+
     def manhattanDistance(self, xy1, xy2):
         return abs(xy1[0]-xy2[0]) + abs(xy1[1]-xy2[1])
 
