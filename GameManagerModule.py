@@ -5,12 +5,16 @@ import jsonpickle
 
 class GameManager:
     def __init__(self, DIM_X, DIM_Y, numOfTanks):
+        self.dimX = DIM_X
+        self.dimY = DIM_Y
         self.isAWin = False
         self.numTanks = numOfTanks
         self.AllTanks = []
         self.winningTank = -1
         self.isPausable = True
         self.isPaused = False
+        self.numActionsTaken = 0
+        self.numWithersTaken = 0
 
         # Add tanks
         for i in range(numOfTanks):
@@ -28,9 +32,6 @@ class GameManager:
 
         self.setActiveTankIndex(-1)
         self.increaseActiveTankIndex()
-
-        self.dimX = DIM_X
-        self.dimY = DIM_Y
 
     def getAllTanks(self):
         return self.AllTanks
@@ -129,6 +130,7 @@ class GameManager:
         return True
 
     def moveActiveTank(self, deltaX, deltaY):
+        self.numActionsTaken += 1
         activeTank = self.getActiveTank()
         activeTank.x += deltaX
         activeTank.y += deltaY
@@ -161,6 +163,7 @@ class GameManager:
     def tryShootOrDonate(self, targetIndex, isShoot):
         success = self.canShootOrDonate(targetIndex)
         if success:
+            self.numActionsTaken += 1
             target = self.getAllTanks()[targetIndex]
             if isShoot:
                 self.shoot(target)
@@ -195,10 +198,13 @@ class GameManager:
         self.decreaseActiveTankActionPoints()
 
     def increaseActiveTankRange(self):
+        self.numActionsTaken += 1
         self.getActiveTank().range += 1
         self.decreaseActiveTankActionPoints()
 
     def witherActiveTank(self):
+        self.numActionsTaken += 1
+        self.numWithersTaken += 1
         self.decreaseActiveTankActionPoints()
 
     def manhattanDistance(self, xy1, xy2):
@@ -206,6 +212,10 @@ class GameManager:
 
     def boxDistance(self, xy1, xy2):
         return max(abs(xy1[0]-xy2[0]), abs(xy1[1]-xy2[1]))
+
+    def getWitherPercentage(self):
+        percent = float(self.numWithersTaken)/self.numActionsTaken
+        return percent
 
     def getFullGameStatus(self):
         jsonStr = jsonpickle.encode(self)

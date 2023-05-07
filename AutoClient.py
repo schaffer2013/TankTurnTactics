@@ -9,7 +9,7 @@ class Client:
         self.brain = Brain(numPossibleActions)
 
     def makeDecision(self, gameStatus):
-        return self.brain.makeDecision(gameStatus) # returns actionIndex
+        return self.brain.makeDecision(gameStatus, True) # returns actionIndex
 
 
     # def makeDecision(self, gameStatus, validActions):

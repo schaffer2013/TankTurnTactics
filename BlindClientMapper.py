@@ -1,5 +1,7 @@
 import jsonpickle
 
+DEBUG = False
+
 PASS_CMD = 0
 MOVE_RIGHT_CMD = 1
 MOVE_LEFT_CMD = 2
@@ -33,26 +35,26 @@ class BlindMapper:
     def mapAction(self, cmdIndex):
         # TODO Replace prints with manager actions
         if (cmdIndex == PASS_CMD):
-            print("Pass")
+            self.printDebug("Pass")
             self.gameManager.increaseActiveTankIndex()
         elif (cmdIndex == MOVE_RIGHT_CMD):
-            print("Right")
+            self.printDebug("Right")
             self.gameManager.tryMoveActiveTankRight()
         elif (cmdIndex == MOVE_LEFT_CMD):
-            print("Left")
+            self.printDebug("Left")
             self.gameManager.tryMoveActiveTankLeft()
         elif (cmdIndex == MOVE_UP_CMD):
-            print("Up")
+            self.printDebug("Up")
             self.gameManager.tryMoveActiveTankUp()
         elif (cmdIndex == MOVE_DOWN_CMD):
-            print("Down")
+            self.printDebug("Down")
             self.gameManager.tryMoveActiveTankDown()
         elif (cmdIndex == INCREASE_RANGE_CMD):
-            print("Increase Range")
+            self.printDebug("Increase Range")
             self.gameManager.increaseActiveTankRange()
         elif (cmdIndex == WITHER_CMD):
-            print("Wither :(")
-            self.gameManager.increaseActiveTankRange()
+            self.printDebug("Wither :(")
+            self.gameManager.witherActiveTank()
         else:
             # For these tank specific commands,
             # shooting tank[0] will immediately follow
@@ -62,11 +64,11 @@ class BlindMapper:
             gameStatus = self.getStatus()
             for t in gameStatus.getAllTanks():
                 if (cmdIndex == self.getShootCmdIndex(t.index)):
-                    print(f'Shoot tank {t.index}')
+                    self.printDebug(f'Shoot tank {t.index}')
                     self.gameManager.tryShootOrDonate(t.index, True)
                     return True
                 elif (cmdIndex == self.getDonateCmdIndex(t.index)):
-                    print(f'Donate to tank {t.index}')
+                    self.printDebug(f'Donate to tank {t.index}')
                     self.gameManager.tryShootOrDonate(t.index, False)
                     return True
             # return False if no case was hit. Will probably need more codes here
@@ -121,4 +123,7 @@ class BlindMapper:
         return tankIndex * NUM_TANK_SPEC_COMMANDS + \
             FIRST_TANK_SPECIFIC_COMMAND + \
             DONATE_TO_THIS_TANK_CMD
+    def printDebug(self, string):
+        if DEBUG:
+            print(string)
     # endregion

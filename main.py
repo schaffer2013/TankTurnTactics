@@ -8,8 +8,8 @@ import AutoClientManager
 HANDS_ON = False
 
 # Grid dimensions
-GRID_DIM_X = 15
-GRID_DIM_Y = 15
+GRID_DIM_X = 10
+GRID_DIM_Y = GRID_DIM_X #Setting to "always square" for range normalization
 
 # This sets the WIDTH and HEIGHT of each grid location
 TOTAL_WIDTH = 1000

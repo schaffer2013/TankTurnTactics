@@ -43,7 +43,7 @@ def getForwardOneHot(array):
     one_hot = np.zeros(array.shape[0], dtype=int)
     maxArg = np.array(array).argmax()
     one_hot[maxArg] = 1
-    return one_hot, maxArg
+    return array, one_hot, maxArg
 
 
 def wiggleValues(vals):
