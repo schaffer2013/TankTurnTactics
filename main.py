@@ -74,9 +74,9 @@ while not done:
     if not HANDS_ON:
         timeSinceLastMove += clock.get_time()
 
-        if (timeSinceLastMove > MOVE_DELAY and not manager.isPaused):
+        if (timeSinceLastMove >= MOVE_DELAY and not manager.isPaused):
             autoClientManager.makeAutoDecision()
-        if (timeSinceLastMove > MOVE_DELAY + PAUSE_DELAY and manager.isPaused):
+        if (timeSinceLastMove >= MOVE_DELAY + PAUSE_DELAY and manager.isPaused):
             manager.resume()
             timeSinceLastMove = 0
 
