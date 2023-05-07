@@ -8,8 +8,8 @@ import AutoClientManager
 HANDS_ON = False
 
 # This sets the WIDTH and HEIGHT of each grid location
-WIDTH = 42
-HEIGHT = 35
+WIDTH = 45
+HEIGHT = 45
 
 # This sets the margin between each cell
 MARGIN = 5
@@ -19,7 +19,7 @@ GRID_DIM_X = 10
 GRID_DIM_Y = 10
 
 # Number of initial tanks
-NUM_TANKS = 10
+NUM_TANKS = 5
 
 # Create a 2 dimensional array. A two dimensional
 # array is simply a list of lists.
@@ -48,7 +48,7 @@ done = False
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
 timeSinceLastMove = 0
-MOVE_DELAY = 1000  # ms
+MOVE_DELAY = 300  # ms
 
 manager = GameManagerModule.GameManager(GRID_DIM_X, GRID_DIM_Y, NUM_TANKS)
 inputMapper = GameManagerMapper.OmnipotentMapper(
@@ -83,12 +83,12 @@ while not done:
             color = ScreenHelper.WHITE
             ScreenHelper.drawCell(c, r, color, screen, MARGIN, HEIGHT, WIDTH)
 
-    if HANDS_ON:
-        if inputMapper.isActiveArmed:
-            for s in gameStatus.getShootableSpots():
-                color = ScreenHelper.LIGHT_GRAY
-                ScreenHelper.drawCell(
-                    s[0], s[1], color, screen, MARGIN, HEIGHT, WIDTH)
+    showShootable = True
+    if (HANDS_ON and inputMapper.isActiveArmed) or showShootable:
+        for s in gameStatus.getShootableSpots():
+            color = ScreenHelper.LIGHT_GRAY
+            ScreenHelper.drawCell(
+                s[0], s[1], color, screen, MARGIN, HEIGHT, WIDTH)
 
     for t in gameStatus.getAliveTanks():
         color = ScreenHelper.INACTIVE
@@ -99,26 +99,28 @@ while not done:
         ScreenHelper.drawCell(t.x, t.y, color, screen, MARGIN, HEIGHT, WIDTH)
 
         font = pygame.font.SysFont('Arial', int(HEIGHT/3))
+        biggerFont = pygame.font.SysFont('Arial', int(HEIGHT/2.5))
         tempX = (MARGIN + WIDTH) * t.x + MARGIN
         tempY = (MARGIN + HEIGHT) * t.y + MARGIN
-        # Index Render
+
+        # Range Render
         ScreenHelper.displayText(screen,
                                  font,
-                                 str(t.actionPoints),
+                                 str(t.range),
                                  tempX + int(3*WIDTH/4),
                                  tempY + int(HEIGHT/4))
 
         # Action point render
         ScreenHelper.displayText(screen,
                                  font,
-                                 str(t.index),
+                                 str(t.actionPoints),
                                  tempX + int(WIDTH/4),
                                  tempY + int(HEIGHT/4))
 
-        # Range Render
+        # Index Render
         ScreenHelper.displayText(screen,
-                                 font,
-                                 str(t.range),
+                                 biggerFont,
+                                 str(t.index),
                                  tempX + int(WIDTH/2),
                                  tempY + int(3*HEIGHT/4))
 
@@ -147,6 +149,8 @@ while not done:
     pygame.display.flip()
 
     done = done or manager.isAWin
+    if manager.isAWin:
+        print(f'Tank {manager.activeTankIndex} wins!')
 
 # Be IDLE friendly. If you forget this line, the program will 'hang'
 # on exit.

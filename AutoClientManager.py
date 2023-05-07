@@ -16,5 +16,5 @@ class AutoClientManager:
         possibleActions = self.mapper.getActionValidations()
         activeClient = self.allClients[gameStatus.activeTankIndex]
 
-        action = activeClient.makeRandomDecision(gameStatus, possibleActions)
+        action = activeClient.makeDecision(gameStatus, possibleActions)
         self.mapper.mapAction(action)

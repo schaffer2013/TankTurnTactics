@@ -8,6 +8,7 @@ class GameManager:
         self.isAWin = False
         self.numTanks = numOfTanks
         self.AllTanks = []
+        self.winningTank = -1
 
         # Add tanks
         for i in range(numOfTanks):
@@ -61,10 +62,11 @@ class GameManager:
         self.setActiveTank()
 
     def increaseActiveTankIndex(self):
+        if self.isAWin:
+            self.winningTank = self.activeTankIndex
+            return
         tempIndex = self.activeTankIndex + 1
         self.setActiveTankIndex(tempIndex % len(self.getAllTanks()))
-        if self.isAWin:
-            return
         active = self.getActiveTank()
         if (active.isAlive):
             self.increaseActiveTankActionPoints()
