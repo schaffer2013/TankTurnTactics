@@ -8,7 +8,7 @@ class Client:
 
     def makeDecision(self, gameStatus, validActions):
         restrictedValidActions = Strategy.pruneValidActions(
-            validActions, Strategy.STRATEGY_NO_MOVE)
+            validActions, Strategy.STRATEGY_NO_DONATE)
         return self.makeRandomDecision(restrictedValidActions)
 
     def makeRandomDecision(self, validActions):

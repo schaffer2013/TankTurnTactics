@@ -63,7 +63,6 @@ class GameManager:
 
     def increaseActiveTankIndex(self):
         if self.isAWin:
-            self.winningTank = self.activeTankIndex
             return
         tempIndex = self.activeTankIndex + 1
         self.setActiveTankIndex(tempIndex % len(self.getAllTanks()))
@@ -174,6 +173,7 @@ class GameManager:
             target.isAlive = False
             if (len(self.getAliveTanks()) <= 1):
                 self.isAWin = True
+                self.winningTank = self.activeTankIndex
         else:
             target.extra_lives -= 1
         self.decreaseActiveTankActionPoints()

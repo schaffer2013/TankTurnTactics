@@ -19,7 +19,7 @@ GRID_DIM_X = 10
 GRID_DIM_Y = 10
 
 # Number of initial tanks
-NUM_TANKS = 5
+NUM_TANKS = 25
 
 # Create a 2 dimensional array. A two dimensional
 # array is simply a list of lists.
@@ -83,10 +83,13 @@ while not done:
             color = ScreenHelper.WHITE
             ScreenHelper.drawCell(c, r, color, screen, MARGIN, HEIGHT, WIDTH)
 
-    showShootable = True
-    if (HANDS_ON and inputMapper.isActiveArmed) or showShootable:
+    showShootable = not HANDS_ON
+    showAvailableRange = inputMapper.isActiveArmed or inputMapper.isActiveReadyToGive
+    if (HANDS_ON and showAvailableRange) or showShootable:
         for s in gameStatus.getShootableSpots():
             color = ScreenHelper.LIGHT_GRAY
+            if inputMapper.isActiveReadyToGive:
+                color = ScreenHelper.LIGHT_PURPLE
             ScreenHelper.drawCell(
                 s[0], s[1], color, screen, MARGIN, HEIGHT, WIDTH)
 
@@ -150,7 +153,7 @@ while not done:
 
     done = done or manager.isAWin
     if manager.isAWin:
-        print(f'Tank {manager.activeTankIndex} wins!')
+        print(f'Tank {manager.winningTank} wins!')
 
 # Be IDLE friendly. If you forget this line, the program will 'hang'
 # on exit.
