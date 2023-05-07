@@ -9,7 +9,7 @@ Each tank has a *range*, *extra lives*, and *action points* it can use. During e
 - Donate the current action point to a tank in range
 - Increase shooting range by 1
 - Pass (do nothing, but maintain your current action point)
-- Wither (do nother, but lose current action point. This is generally bad)
+- Wither (do nothing, but lose current action point. This is generally bad)
 
 ## Tank icon
 <img width="55" alt="image" src="https://user-images.githubusercontent.com/9828010/236706502-01b3ef53-339e-49c5-a30d-2556a4e03696.png">
