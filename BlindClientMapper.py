@@ -51,7 +51,7 @@ class BlindMapper:
             print("Increase Range")
             self.gameManager.increaseActiveTankRange()
         elif (cmdIndex == WITHER_CMD):
-            print("Wither")
+            print("Wither :(")
             self.gameManager.increaseActiveTankRange()
         else:
             # For these tank specific commands,

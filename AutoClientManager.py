@@ -9,12 +9,18 @@ class AutoClientManager:
 
         self.allClients = []
         for i in range(gameStatus.numTanks):
-            self.allClients.append(Client(i))
+            self.allClients.append(Client(i, self.mapper.highestCmdIndex + 1))
+            self.allClients[i].brain.reInitWeightsAndBiases(gameStatus)
 
     def makeAutoDecision(self):
         gameStatus = self.mapper.getStatus()
         possibleActions = self.mapper.getActionValidations()
         activeClient = self.allClients[gameStatus.activeTankIndex]
 
-        action = activeClient.makeDecision(gameStatus, possibleActions)
-        self.mapper.mapAction(action)
+        action = activeClient.makeDecision(gameStatus)
+        if (possibleActions[action]):
+            self.mapper.mapAction(action)
+        else:
+            # if the client chooses an action they can't do, 
+            # replace with a wither as punishment
+            self.mapper.mapAction(BlindClientMapper.WITHER_CMD)

@@ -8,8 +8,8 @@ import AutoClientManager
 HANDS_ON = False
 
 # Grid dimensions
-GRID_DIM_X = 30
-GRID_DIM_Y = 30
+GRID_DIM_X = 15
+GRID_DIM_Y = 15
 
 # This sets the WIDTH and HEIGHT of each grid location
 TOTAL_WIDTH = 1000
@@ -21,7 +21,7 @@ HEIGHT = int(TOTAL_HEIGHT/GRID_DIM_Y)
 MARGIN = int(min(WIDTH, HEIGHT)/10)
 
 # Number of initial tanks
-NUM_TANKS = 90
+NUM_TANKS = 10
 
 # Create a 2 dimensional array. A two dimensional
 # array is simply a list of lists.
