@@ -71,8 +71,8 @@ class GameManager:
         else:
             self.increaseActiveTankIndex()
 
-    def increaseTankActionPoints(self, tankIndex):
-        self.getAllTanks[tankIndex].actionPoints += 1
+    def increaseTankActionPoints(self, target):
+        target.actionPoints += 1
 
     def increaseActiveTankActionPoints(self):
         self.getActiveTank().actionPoints += 1
@@ -167,17 +167,17 @@ class GameManager:
             success = True
         return success
 
-    def shoot(self, t):
-        if (t.extra_lives == 0):
-            t.isAlive = False
+    def shoot(self, target):
+        if (target.extra_lives == 0):
+            target.isAlive = False
             if (len(self.getAliveTanks()) <= 1):
                 self.isAWin = True
         else:
-            t.extra_lives -= 1
+            target.extra_lives -= 1
         self.decreaseActiveTankActionPoints()
 
-    def donateTo(self, targetIndex):
-        self.increaseTankActionPoints(targetIndex)
+    def donateTo(self, target):
+        self.increaseTankActionPoints(target)
         self.decreaseActiveTankActionPoints()
 
     def increaseActiveTankRange(self):

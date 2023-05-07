@@ -1,9 +1,11 @@
 import pygame
 import jsonpickle
-from Tank import Tank
 import GameManagerModule
 import ScreenHelper
 import GameManagerMapper
+import AutoClientManager
+
+HANDS_ON = False
 
 # This sets the WIDTH and HEIGHT of each grid location
 WIDTH = 42
@@ -17,7 +19,7 @@ GRID_DIM_X = 10
 GRID_DIM_Y = 10
 
 # Number of initial tanks
-NUM_TANKS = 2
+NUM_TANKS = 10
 
 # Create a 2 dimensional array. A two dimensional
 # array is simply a list of lists.
@@ -45,20 +47,32 @@ done = False
 
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
+timeSinceLastMove = 0
+MOVE_DELAY = 1000  # ms
 
 manager = GameManagerModule.GameManager(GRID_DIM_X, GRID_DIM_Y, NUM_TANKS)
-mapper = GameManagerMapper.OmnipotentMapper(manager, WIDTH, HEIGHT, MARGIN)
+inputMapper = GameManagerMapper.OmnipotentMapper(
+    manager, WIDTH, HEIGHT, MARGIN)
+autoClientManager = AutoClientManager.AutoClientManager(manager)
 
 # -------- Main Program Loop -----------
 while not done:
     gameStatus = jsonpickle.decode(manager.getFullGameStatus())
+
     for event in pygame.event.get():  # User did something
         if event.type == pygame.QUIT:  # If user clicked close
             done = True  # Flag that we are done so we exit this loop
-        if (event.type == pygame.KEYDOWN):
-            mapper.mapKeyboardEvent(event)
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            mapper.mapMouseEvent(event)
+
+        if HANDS_ON:
+            if (event.type == pygame.KEYDOWN):
+                inputMapper.mapKeyboardEvent(event)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                inputMapper.mapMouseEvent(event)
+    if not HANDS_ON:
+        timeSinceLastMove += clock.get_time()
+        if (timeSinceLastMove > MOVE_DELAY):
+            timeSinceLastMove = 0
+            autoClientManager.makeAutoDecision()
 
     # Set the screen background
     screen.fill(ScreenHelper.BLACK)
@@ -69,11 +83,12 @@ while not done:
             color = ScreenHelper.WHITE
             ScreenHelper.drawCell(c, r, color, screen, MARGIN, HEIGHT, WIDTH)
 
-    if mapper.isActiveArmed:
-        for s in gameStatus.getShootableSpots():
-            color = ScreenHelper.LIGHT_GRAY
-            ScreenHelper.drawCell(
-                s[0], s[1], color, screen, MARGIN, HEIGHT, WIDTH)
+    if HANDS_ON:
+        if inputMapper.isActiveArmed:
+            for s in gameStatus.getShootableSpots():
+                color = ScreenHelper.LIGHT_GRAY
+                ScreenHelper.drawCell(
+                    s[0], s[1], color, screen, MARGIN, HEIGHT, WIDTH)
 
     for t in gameStatus.getAliveTanks():
         color = ScreenHelper.INACTIVE

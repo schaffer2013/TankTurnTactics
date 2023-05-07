@@ -33,16 +33,22 @@ class BlindMapper:
         # TODO Replace prints with manager actions
         if (cmdIndex == PASS_CMD):
             print("Pass")
+            self.gameManager.increaseActiveTankIndex()
         elif (cmdIndex == MOVE_RIGHT_CMD):
             print("Right")
+            self.gameManager.tryMoveActiveTankRight()
         elif (cmdIndex == MOVE_LEFT_CMD):
             print("Left")
+            self.gameManager.tryMoveActiveTankLeft()
         elif (cmdIndex == MOVE_UP_CMD):
             print("Up")
+            self.gameManager.tryMoveActiveTankUp()
         elif (cmdIndex == MOVE_DOWN_CMD):
             print("Down")
+            self.gameManager.tryMoveActiveTankDown()
         elif (cmdIndex == INCREASE_RANGE_CMD):
             print("Increase Range")
+            self.gameManager.increaseActiveTankRange()
         else:
             # For these tank specific commands,
             # shooting tank[0] will immediately follow
@@ -53,9 +59,11 @@ class BlindMapper:
             for t in gameStatus.getAllTanks():
                 if (cmdIndex == self.getShootCmdIndex(t.index)):
                     print(f'Shoot tank {t.index}')
+                    self.gameManager.tryShootOrDonate(t.index, True)
                     return True
                 elif (cmdIndex == self.getDonateCmdIndex(t.index)):
                     print(f'Donate to tank {t.index}')
+                    self.gameManager.tryShootOrDonate(t.index, False)
                     return True
             # return False if no case was hit. Will probably need more codes here
             return False
