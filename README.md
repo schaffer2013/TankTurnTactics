@@ -2,6 +2,11 @@
 
 This project is to simulate [Tank Turn Tactics](https://youtu.be/aOYbR-Q_4Hs), a game which uses turn-based tanks to defeat all others. It exists on a grid, and each tank takes turns to do actions. 
 
+### Need help starting it?
+- Run from `main.py`
+- Make sure `VISUAL` is set to `True`
+- Make sure there is some reasonable `MOVE_DELAY` time (maybe 300 ms?)
+
 ## General description
 Each tank has a *range*, *extra lives*, and *action points* it can use. During each turn, the active tank first gains one action point, then it can use any or all of its action points with the following actions:
 - Move to an open spot (in a cardinal direction)
