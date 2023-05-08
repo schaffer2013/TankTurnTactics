@@ -7,22 +7,25 @@ class GameManager:
     def __init__(self, DIM_X, DIM_Y, numOfTanks):
         self.dimX = DIM_X
         self.dimY = DIM_Y
-        self.isAWin = False
+        self.isPausable = True
         self.numTanks = numOfTanks
+        self.reInit()
+        
+    def reInit(self):
         self.AllTanks = []
         self.winningTank = -1
-        self.isPausable = True
+        self.isAWin = False
         self.isPaused = False
         self.numActionsTaken = 0
         self.numWithersTaken = 0
 
         # Add tanks
-        for i in range(numOfTanks):
+        for i in range(self.numTanks):
             overlap = True
             while (overlap):
                 overlap = False
-                x = random.randint(0, DIM_X - 1)
-                y = random.randint(0, DIM_Y - 1)
+                x = random.randint(0, self.dimX - 1)
+                y = random.randint(0, self.dimY - 1)
                 for t in self.AllTanks:
                     if (t.x == x and t.y == y):
                         overlap = True
