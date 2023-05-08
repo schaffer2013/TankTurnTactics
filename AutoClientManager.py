@@ -10,7 +10,23 @@ class AutoClientManager:
         self.allClients = []
         for i in range(gameStatus.numTanks):
             self.allClients.append(Client(i, self.mapper.highestCmdIndex + 1))
-            self.allClients[i].brain.reInitWeightsAndBiases(gameStatus)
+            self.allClients[i].brain.initWeightsAndBiases(gameStatus)
+
+    def reInit(self, newGen):
+        self.allClients = []
+        for i in range(len(newGen)):
+            self.allClients.append(Client(i, self.mapper.highestCmdIndex + 1))
+            # Reinit the w+b as params from the survivors from the previous gen
+            brain = self.allClients[i].brain
+            brain.reinitWeightsAndBiases(self.allSavedClientParams[newGen[i]])
+            brain.wiggle()
+        a = 1
+
+    def exportWeights(self):
+        self.allSavedClientParams = []
+        for i in range(len(self.allClients)):
+            self.allSavedClientParams.append(
+                self.allClients[i].brain.exportParams())
 
     def makeAutoDecision(self):
         gameStatus = self.mapper.getStatus()
@@ -21,6 +37,6 @@ class AutoClientManager:
         if (possibleActions[action]):
             self.mapper.mapAction(action)
         else:
-            # if the client chooses an action they can't do, 
+            # if the client chooses an action they can't do,
             # replace with a wither as punishment
             self.mapper.mapAction(BlindClientMapper.WITHER_CMD)

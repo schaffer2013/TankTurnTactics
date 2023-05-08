@@ -2,17 +2,20 @@ import numpy as np
 import NeuralNet
 import copy
 
-LAYER_1_NODES = 15
+LAYER_1_NODES = 60
 
 
 class Brain:
     def __init__(self, numActions):
         self.numActions = numActions
 
-    def reInitWeightsAndBiases(self, exampleGameStatus):
+    def initWeightsAndBiases(self, exampleGameStatus):
         ngs = self.normalizeGameStatus(exampleGameStatus)
         self.W1, self.b1, self.W2, self.b2 = NeuralNet.init_params(
             len(ngs), LAYER_1_NODES, self.numActions)
+    
+    def reinitWeightsAndBiases(self, params):
+        self.W1, self.b1, self.W2, self.b2 = params
 
     def makeDecision(self, gameStatus, weightedDecision=False):
         ngs = self.normalizeGameStatus(gameStatus)
@@ -67,3 +70,6 @@ class Brain:
         tankParams.append(min(float(tank.actionPoints) /
                           10.0, 1.0) * float(tank.isAlive))
         return tankParams
+
+    def exportParams(self):
+        return (self.W1, self.b1, self.W2, self.b2)

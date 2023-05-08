@@ -1,4 +1,7 @@
+import random
 import pygame
+import Lin
+import numpy as np
 import jsonpickle
 import GameManagerModule
 import ScreenHelper
@@ -9,7 +12,7 @@ HANDS_ON = False
 VISUAL = True
 
 # Grid dimensions
-GRID_DIM_X = 10
+GRID_DIM_X = 4
 GRID_DIM_Y = GRID_DIM_X  # Setting to "always square" for range normalization
 
 # This sets the WIDTH and HEIGHT of each grid location
@@ -22,7 +25,7 @@ HEIGHT = int(TOTAL_HEIGHT/GRID_DIM_Y)
 MARGIN = int(min(WIDTH, HEIGHT)/10)
 
 # Number of initial tanks
-NUM_TANKS = 10
+NUM_TANKS = 4
 
 # Create a 2 dimensional array. A two dimensional
 # array is simply a list of lists.
@@ -44,11 +47,9 @@ if VISUAL:
     screen = pygame.display.set_mode(WINDOW_SIZE)
 
 # Set title of screen
-if  VISUAL:
+if VISUAL:
     pygame.display.set_caption("Tank Turn Tactics")
 
-# Loop until the user clicks the close button.
-done = False
 
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
@@ -57,126 +58,173 @@ MOVE_DELAY = 0  # ms
 PAUSE_DELAY = MOVE_DELAY * 2
 
 manager = GameManagerModule.GameManager(GRID_DIM_X, GRID_DIM_Y, NUM_TANKS)
+manager.reInit()
 inputMapper = GameManagerMapper.OmnipotentMapper(
     manager, WIDTH, HEIGHT, MARGIN)
 autoClientManager = AutoClientManager.AutoClientManager(manager)
 
-# -------- Main Program Loop -----------
-while not done:
-    gameStatus = jsonpickle.decode(manager.getFullGameStatus())
+# -------- Outside loop for epochs ------- #
+witherPercentage = 1.0
+epochNumber = -1
+epochList = []
+witherList = []
 
-    for event in pygame.event.get():  # User did something
-        if event.type == pygame.QUIT:  # If user clicked close
-            done = True  # Flag that we are done so we exit this loop
+while (witherPercentage > 0.1):
+    print("________")
+    epochNumber += 1
+    print(f'Epoch {epochNumber}')
 
-        if HANDS_ON:
-            if (event.type == pygame.KEYDOWN):
-                inputMapper.mapKeyboardEvent(event)
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                inputMapper.mapMouseEvent(event)
-    if not HANDS_ON:
-        timeSinceLastMove += clock.get_time()
+    # Loop until the user clicks the close button.
+    done = False
 
-        if (timeSinceLastMove >= MOVE_DELAY and not manager.isPaused):
-            autoClientManager.makeAutoDecision()
-        if (timeSinceLastMove >= MOVE_DELAY + PAUSE_DELAY and manager.isPaused):
-            manager.resume()
-            timeSinceLastMove = 0
-    
-    if VISUAL:
+    # -------- Main Program Loop -----------
+    while not done:
 
-        # Set the screen background
-        screen.fill(ScreenHelper.BLACK)
+        gameStatus = jsonpickle.decode(manager.getFullGameStatus())
 
-        # Draw the grid
-        for r in range(GRID_DIM_Y):
-            for c in range(GRID_DIM_X):
-                color = ScreenHelper.WHITE
-                ScreenHelper.drawCell(c, r, color, screen, MARGIN, HEIGHT, WIDTH)
+        for event in pygame.event.get():  # User did something
+            if event.type == pygame.QUIT:  # If user clicked close
+                done = True  # Flag that we are done so we exit this loop
 
-        showShootable = not HANDS_ON
-        showAvailableRange = inputMapper.isActiveArmed or inputMapper.isActiveReadyToGive
-        if (HANDS_ON and showAvailableRange) or showShootable:
-            for s in gameStatus.getShootableSpots():
-                color = ScreenHelper.LIGHT_GRAY
-                if inputMapper.isActiveReadyToGive:
-                    color = ScreenHelper.LIGHT_PURPLE
-                ScreenHelper.drawCell(
-                    s[0], s[1], color, screen, MARGIN, HEIGHT, WIDTH)
+            if HANDS_ON:
+                if (event.type == pygame.KEYDOWN):
+                    inputMapper.mapKeyboardEvent(event)
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    inputMapper.mapMouseEvent(event)
+        if not HANDS_ON:
+            timeSinceLastMove += clock.get_time()
 
-        for t in gameStatus.getAliveTanks():
-            color = ScreenHelper.INACTIVE
-            if t.isActive:
-                color = ScreenHelper.ACTIVE
-            # region Tank Rendering
+            if (timeSinceLastMove >= MOVE_DELAY and not manager.isPaused):
+                autoClientManager.makeAutoDecision()
+            if (timeSinceLastMove >= MOVE_DELAY + PAUSE_DELAY and manager.isPaused):
+                manager.resume()
+                timeSinceLastMove = 0
 
-            ScreenHelper.drawCell(t.x, t.y, color, screen, MARGIN, HEIGHT, WIDTH)
+        if VISUAL:
 
-            font = pygame.font.SysFont('Arial', int(HEIGHT/3))
-            biggerFont = pygame.font.SysFont('Arial', int(HEIGHT/2.5))
-            tempX = (MARGIN + WIDTH) * t.x + MARGIN
-            tempY = (MARGIN + HEIGHT) * t.y + MARGIN
+            # Set the screen background
+            screen.fill(ScreenHelper.BLACK)
 
-            # Range Render
-            ScreenHelper.displayText(screen,
-                                    font,
-                                    str(t.range),
-                                    tempX + int(3*WIDTH/4),
-                                    tempY + int(HEIGHT/4))
+            # Draw the grid
+            for r in range(GRID_DIM_Y):
+                for c in range(GRID_DIM_X):
+                    color = ScreenHelper.WHITE
+                    ScreenHelper.drawCell(
+                        c, r, color, screen, MARGIN, HEIGHT, WIDTH)
 
-            # Action point render
-            ScreenHelper.displayText(screen,
-                                    font,
-                                    str(t.actionPoints),
-                                    tempX + int(WIDTH/4),
-                                    tempY + int(HEIGHT/4))
+            showShootable = not HANDS_ON
+            showAvailableRange = inputMapper.isActiveArmed or inputMapper.isActiveReadyToGive
+            if (HANDS_ON and showAvailableRange) or showShootable:
+                for s in gameStatus.getShootableSpots():
+                    color = ScreenHelper.LIGHT_GRAY
+                    if inputMapper.isActiveReadyToGive:
+                        color = ScreenHelper.LIGHT_PURPLE
+                    ScreenHelper.drawCell(
+                        s[0], s[1], color, screen, MARGIN, HEIGHT, WIDTH)
 
-            # Index Render
-            ScreenHelper.displayText(screen,
-                                    biggerFont,
-                                    str(t.index),
-                                    tempX + int(WIDTH/2),
-                                    tempY + int(3*HEIGHT/4))
+            for t in gameStatus.getAliveTanks():
+                color = ScreenHelper.INACTIVE
+                if t.isActive:
+                    color = ScreenHelper.ACTIVE
+                # region Tank Rendering
 
-            # Extra Live Render
-            circleLeft = tempX
-            circleRight = tempX + WIDTH
-            circleBottom = tempY + HEIGHT
-            circleRadius = min(WIDTH/3, HEIGHT/3)/2
-            if (t.extra_lives > 0):
-                ScreenHelper.drawRedCircle(screen,
-                                        (circleLeft, circleBottom),
-                                        circleRadius,
-                                        draw_top_right=True)
-            if (t.extra_lives > 1):
-                ScreenHelper.drawRedCircle(screen,
-                                        (circleRight, circleBottom),
-                                        circleRadius,
-                                        draw_top_left=True)
+                ScreenHelper.drawCell(t.x, t.y, color, screen,
+                                      MARGIN, HEIGHT, WIDTH)
 
-                # endregion
+                font = pygame.font.SysFont('Arial', int(HEIGHT/3))
+                biggerFont = pygame.font.SysFont('Arial', int(HEIGHT/2.5))
+                tempX = (MARGIN + WIDTH) * t.x + MARGIN
+                tempY = (MARGIN + HEIGHT) * t.y + MARGIN
 
-    # Limit to 60 frames per second
-    clock.tick(60)
+                # Range Render
+                ScreenHelper.displayText(screen,
+                                         font,
+                                         str(t.range),
+                                         tempX + int(3*WIDTH/4),
+                                         tempY + int(HEIGHT/4))
 
-    # Go ahead and update the screen with what we've drawn.
-    if VISUAL:
-        pygame.display.flip()
+                # Action point render
+                ScreenHelper.displayText(screen,
+                                         font,
+                                         str(t.actionPoints),
+                                         tempX + int(WIDTH/4),
+                                         tempY + int(HEIGHT/4))
 
-    done = done or manager.isAWin
-    if manager.isAWin:
-        print(f'Tank {manager.winningTank} wins!')
-        print("Move percentage: %.2f" %
-              (manager.getMovePercentage()*100.0))
-        print("Shoot percentage: %.2f" %
-              (manager.getShotPercentage()*100.0))
-        print("Donate percentage: %.2f" %
-              (manager.getDonatePercentage()*100.0))
-        print("Increase range percentage: %.2f" %
-              (manager.getIncreaseRangePercentage()*100.0))
-        print("Wither percentage: %.2f" %
-              (manager.getWitherPercentage()*100.0))
+                # Index Render
+                ScreenHelper.displayText(screen,
+                                         biggerFont,
+                                         str(t.index),
+                                         tempX + int(WIDTH/2),
+                                         tempY + int(3*HEIGHT/4))
 
+                # Extra Live Render
+                circleLeft = tempX
+                circleRight = tempX + WIDTH
+                circleBottom = tempY + HEIGHT
+                circleRadius = min(WIDTH/3, HEIGHT/3)/2
+                if (t.extra_lives > 0):
+                    ScreenHelper.drawRedCircle(screen,
+                                               (circleLeft, circleBottom),
+                                               circleRadius,
+                                               draw_top_right=True)
+                if (t.extra_lives > 1):
+                    ScreenHelper.drawRedCircle(screen,
+                                               (circleRight, circleBottom),
+                                               circleRadius,
+                                               draw_top_left=True)
+
+                    # endregion
+
+        # Limit to 60 frames per second
+        clock.tick(60)
+
+        # Go ahead and update the screen with what we've drawn.
+        if VISUAL:
+            pygame.display.flip()
+
+        done = done or manager.isAWin
+        if manager.isAWin:
+            witherPercentage = manager.getWitherPercentage()
+            print(f'Tank {manager.winningTank} wins!')
+            print("Move percentage: %.2f" %
+                  (manager.getMovePercentage()*100.0))
+            print("Shoot percentage: %.2f" %
+                  (manager.getShotPercentage()*100.0))
+            print("Donate percentage: %.2f" %
+                  (manager.getDonatePercentage()*100.0))
+            print("Increase range percentage: %.2f" %
+                  (manager.getIncreaseRangePercentage()*100.0))
+            print("Wither percentage: %.2f" %
+                  (manager.getWitherPercentage()*100.0))
+    # See epoch trend
+    epochList.append(epochNumber)
+    witherList.append(witherPercentage)
+    if (len(epochList) >= 3):
+        m, m_res, b, b_res = Lin.fit(epochList, witherList)
+        print("slope: %.4f +/- %.4f" % (m, m_res))
+        if (abs(m) < abs(m_res)):
+            print("insignificant")
+        else:
+            print("SIGNIFICANT")
+
+    # After single game loop between epochs--------------
+    # Save old brain params
+    autoClientManager.exportWeights()
+
+    # Get next gen population
+    newPopulationPool = []
+    for i in range(len(manager.deadTankIndices)):
+        # Add 1 possible new gen for each tank, and one for
+        # each tank that died before it. The last tank has the
+        # most in the pool.
+        newPopulationPool.extend([manager.deadTankIndices[i]] * (i+1))
+
+    random.shuffle(newPopulationPool)
+    newGen = newPopulationPool[:NUM_TANKS]
+    autoClientManager.reInit(newGen)
+    manager.reInit()
+
+#----------------#
 # Be IDLE friendly. If you forget this line, the program will 'hang'
 # on exit.
 pygame.quit()

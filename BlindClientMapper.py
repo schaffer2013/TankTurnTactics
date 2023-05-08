@@ -30,6 +30,7 @@ class BlindMapper:
 
     def getStatus(self):
         gameStatus = jsonpickle.decode(self.gameManager.getFullGameStatus())
+        #gameStatus.reInit()
         return gameStatus
 
     def mapAction(self, cmdIndex):

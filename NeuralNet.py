@@ -7,7 +7,7 @@ import numpy as np
 # NUM_OUTPUTS = 14
 
 # Params for randomization
-STANDARD_DEV = 0.02
+STANDARD_DEV = 0.005
 
 
 def init_params(numInputs, layer1Nodes, numOutputs):
@@ -22,6 +22,10 @@ def ReLU(Z):
     return np.maximum(Z, 0)
 
 
+def sig(Z):
+    return 1/(1 + np.exp(-Z))
+
+
 def softmax(Z):
     A = np.exp(Z) / sum(np.exp(Z))
     return A
@@ -29,7 +33,7 @@ def softmax(Z):
 
 def forward_prop(W1, b1, W2, b2, X):
     Z1 = W1.dot(X) + b1
-    A1 = ReLU(Z1)
+    A1 = sig(Z1)
     Z2 = W2.dot(A1) + b2
     A2 = softmax(Z2)
     return Z1, A1, Z2, A2

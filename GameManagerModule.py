@@ -9,7 +9,6 @@ class GameManager:
         self.dimY = DIM_Y
         self.isPausable = True
         self.numTanks = numOfTanks
-        self.reInit()
         
     def reInit(self):
         self.AllTanks = []
@@ -22,6 +21,7 @@ class GameManager:
         self.numShotsTaken = 0
         self.numRangeIncreases = 0
         self.numDonationsTaken = 0
+        self.deadTankIndices = []
 
         # Add tanks
         for i in range(self.numTanks):
@@ -196,9 +196,11 @@ class GameManager:
     def shoot(self, target):
         if (target.extra_lives == 0):
             target.isAlive = False
+            self.deadTankIndices.append(target.index)
             if (len(self.getAliveTanks()) <= 1):
                 self.isAWin = True
                 self.winningTank = self.activeTankIndex
+                self.deadTankIndices.append(self.winningTank)
         else:
             target.extra_lives -= 1
         self.decreaseActiveTankActionPoints()
