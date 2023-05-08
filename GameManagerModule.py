@@ -18,6 +18,10 @@ class GameManager:
         self.isPaused = False
         self.numActionsTaken = 0
         self.numWithersTaken = 0
+        self.numMovesTaken = 0
+        self.numShotsTaken = 0
+        self.numRangeIncreases = 0
+        self.numDonationsTaken = 0
 
         # Add tanks
         for i in range(self.numTanks):
@@ -133,6 +137,7 @@ class GameManager:
         return True
 
     def moveActiveTank(self, deltaX, deltaY):
+        self.numMovesTaken += 1
         self.numActionsTaken += 1
         activeTank = self.getActiveTank()
         activeTank.x += deltaX
@@ -169,8 +174,10 @@ class GameManager:
             self.numActionsTaken += 1
             target = self.getAllTanks()[targetIndex]
             if isShoot:
+                self.numShotsTaken += 1
                 self.shoot(target)
             else:
+                self.numDonationsTaken += 1
                 self.donateTo(target)
         return success
 
@@ -202,6 +209,7 @@ class GameManager:
 
     def increaseActiveTankRange(self):
         self.numActionsTaken += 1
+        self.numRangeIncreases += 1
         self.getActiveTank().range += 1
         self.decreaseActiveTankActionPoints()
 
@@ -218,6 +226,22 @@ class GameManager:
 
     def getWitherPercentage(self):
         percent = float(self.numWithersTaken)/self.numActionsTaken
+        return percent
+    
+    def getShotPercentage(self):
+        percent = float(self.numShotsTaken)/self.numActionsTaken
+        return percent
+    
+    def getDonatePercentage(self):
+        percent = float(self.numDonationsTaken)/self.numActionsTaken
+        return percent
+    
+    def getMovePercentage(self):
+        percent = float(self.numMovesTaken)/self.numActionsTaken
+        return percent
+    
+    def getIncreaseRangePercentage(self):
+        percent = float(self.numRangeIncreases)/self.numActionsTaken
         return percent
 
     def getFullGameStatus(self):

@@ -6,10 +6,11 @@ import GameManagerMapper
 import AutoClientManager
 
 HANDS_ON = False
+VISUAL = True
 
 # Grid dimensions
 GRID_DIM_X = 10
-GRID_DIM_Y = GRID_DIM_X #Setting to "always square" for range normalization
+GRID_DIM_Y = GRID_DIM_X  # Setting to "always square" for range normalization
 
 # This sets the WIDTH and HEIGHT of each grid location
 TOTAL_WIDTH = 1000
@@ -39,10 +40,12 @@ pygame.init()
 # Set the HEIGHT and WIDTH of the screen
 WINDOW_SIZE = [(WIDTH+MARGIN)*GRID_DIM_X+MARGIN,
                (HEIGHT+MARGIN)*GRID_DIM_Y+MARGIN]
-screen = pygame.display.set_mode(WINDOW_SIZE)
+if VISUAL:
+    screen = pygame.display.set_mode(WINDOW_SIZE)
 
 # Set title of screen
-pygame.display.set_caption("Tank Turn Tactics")
+if  VISUAL:
+    pygame.display.set_caption("Tank Turn Tactics")
 
 # Loop until the user clicks the close button.
 done = False
@@ -50,7 +53,7 @@ done = False
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
 timeSinceLastMove = 0
-MOVE_DELAY = 100  # ms
+MOVE_DELAY = 0  # ms
 PAUSE_DELAY = MOVE_DELAY * 2
 
 manager = GameManagerModule.GameManager(GRID_DIM_X, GRID_DIM_Y, NUM_TANKS)
@@ -79,87 +82,98 @@ while not done:
         if (timeSinceLastMove >= MOVE_DELAY + PAUSE_DELAY and manager.isPaused):
             manager.resume()
             timeSinceLastMove = 0
+    
+    if VISUAL:
 
-    # Set the screen background
-    screen.fill(ScreenHelper.BLACK)
+        # Set the screen background
+        screen.fill(ScreenHelper.BLACK)
 
-    # Draw the grid
-    for r in range(GRID_DIM_Y):
-        for c in range(GRID_DIM_X):
-            color = ScreenHelper.WHITE
-            ScreenHelper.drawCell(c, r, color, screen, MARGIN, HEIGHT, WIDTH)
+        # Draw the grid
+        for r in range(GRID_DIM_Y):
+            for c in range(GRID_DIM_X):
+                color = ScreenHelper.WHITE
+                ScreenHelper.drawCell(c, r, color, screen, MARGIN, HEIGHT, WIDTH)
 
-    showShootable = not HANDS_ON
-    showAvailableRange = inputMapper.isActiveArmed or inputMapper.isActiveReadyToGive
-    if (HANDS_ON and showAvailableRange) or showShootable:
-        for s in gameStatus.getShootableSpots():
-            color = ScreenHelper.LIGHT_GRAY
-            if inputMapper.isActiveReadyToGive:
-                color = ScreenHelper.LIGHT_PURPLE
-            ScreenHelper.drawCell(
-                s[0], s[1], color, screen, MARGIN, HEIGHT, WIDTH)
+        showShootable = not HANDS_ON
+        showAvailableRange = inputMapper.isActiveArmed or inputMapper.isActiveReadyToGive
+        if (HANDS_ON and showAvailableRange) or showShootable:
+            for s in gameStatus.getShootableSpots():
+                color = ScreenHelper.LIGHT_GRAY
+                if inputMapper.isActiveReadyToGive:
+                    color = ScreenHelper.LIGHT_PURPLE
+                ScreenHelper.drawCell(
+                    s[0], s[1], color, screen, MARGIN, HEIGHT, WIDTH)
 
-    for t in gameStatus.getAliveTanks():
-        color = ScreenHelper.INACTIVE
-        if t.isActive:
-            color = ScreenHelper.ACTIVE
-        # region Tank Rendering
+        for t in gameStatus.getAliveTanks():
+            color = ScreenHelper.INACTIVE
+            if t.isActive:
+                color = ScreenHelper.ACTIVE
+            # region Tank Rendering
 
-        ScreenHelper.drawCell(t.x, t.y, color, screen, MARGIN, HEIGHT, WIDTH)
+            ScreenHelper.drawCell(t.x, t.y, color, screen, MARGIN, HEIGHT, WIDTH)
 
-        font = pygame.font.SysFont('Arial', int(HEIGHT/3))
-        biggerFont = pygame.font.SysFont('Arial', int(HEIGHT/2.5))
-        tempX = (MARGIN + WIDTH) * t.x + MARGIN
-        tempY = (MARGIN + HEIGHT) * t.y + MARGIN
+            font = pygame.font.SysFont('Arial', int(HEIGHT/3))
+            biggerFont = pygame.font.SysFont('Arial', int(HEIGHT/2.5))
+            tempX = (MARGIN + WIDTH) * t.x + MARGIN
+            tempY = (MARGIN + HEIGHT) * t.y + MARGIN
 
-        # Range Render
-        ScreenHelper.displayText(screen,
-                                 font,
-                                 str(t.range),
-                                 tempX + int(3*WIDTH/4),
-                                 tempY + int(HEIGHT/4))
+            # Range Render
+            ScreenHelper.displayText(screen,
+                                    font,
+                                    str(t.range),
+                                    tempX + int(3*WIDTH/4),
+                                    tempY + int(HEIGHT/4))
 
-        # Action point render
-        ScreenHelper.displayText(screen,
-                                 font,
-                                 str(t.actionPoints),
-                                 tempX + int(WIDTH/4),
-                                 tempY + int(HEIGHT/4))
+            # Action point render
+            ScreenHelper.displayText(screen,
+                                    font,
+                                    str(t.actionPoints),
+                                    tempX + int(WIDTH/4),
+                                    tempY + int(HEIGHT/4))
 
-        # Index Render
-        ScreenHelper.displayText(screen,
-                                 biggerFont,
-                                 str(t.index),
-                                 tempX + int(WIDTH/2),
-                                 tempY + int(3*HEIGHT/4))
+            # Index Render
+            ScreenHelper.displayText(screen,
+                                    biggerFont,
+                                    str(t.index),
+                                    tempX + int(WIDTH/2),
+                                    tempY + int(3*HEIGHT/4))
 
-        # Extra Live Render
-        circleLeft = tempX
-        circleRight = tempX + WIDTH
-        circleBottom = tempY + HEIGHT
-        circleRadius = min(WIDTH/3, HEIGHT/3)/2
-        if (t.extra_lives > 0):
-            ScreenHelper.drawRedCircle(screen,
-                                       (circleLeft, circleBottom),
-                                       circleRadius,
-                                       draw_top_right=True)
-        if (t.extra_lives > 1):
-            ScreenHelper.drawRedCircle(screen,
-                                       (circleRight, circleBottom),
-                                       circleRadius,
-                                       draw_top_left=True)
+            # Extra Live Render
+            circleLeft = tempX
+            circleRight = tempX + WIDTH
+            circleBottom = tempY + HEIGHT
+            circleRadius = min(WIDTH/3, HEIGHT/3)/2
+            if (t.extra_lives > 0):
+                ScreenHelper.drawRedCircle(screen,
+                                        (circleLeft, circleBottom),
+                                        circleRadius,
+                                        draw_top_right=True)
+            if (t.extra_lives > 1):
+                ScreenHelper.drawRedCircle(screen,
+                                        (circleRight, circleBottom),
+                                        circleRadius,
+                                        draw_top_left=True)
 
-            # endregion
+                # endregion
 
     # Limit to 60 frames per second
     clock.tick(60)
 
     # Go ahead and update the screen with what we've drawn.
-    pygame.display.flip()
+    if VISUAL:
+        pygame.display.flip()
 
     done = done or manager.isAWin
     if manager.isAWin:
         print(f'Tank {manager.winningTank} wins!')
+        print("Move percentage: %.2f" %
+              (manager.getMovePercentage()*100.0))
+        print("Shoot percentage: %.2f" %
+              (manager.getShotPercentage()*100.0))
+        print("Donate percentage: %.2f" %
+              (manager.getDonatePercentage()*100.0))
+        print("Increase range percentage: %.2f" %
+              (manager.getIncreaseRangePercentage()*100.0))
         print("Wither percentage: %.2f" %
               (manager.getWitherPercentage()*100.0))
 
