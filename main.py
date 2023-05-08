@@ -9,7 +9,7 @@ import GameManagerMapper
 import AutoClientManager
 
 HANDS_ON = False
-VISUAL = False
+VISUAL = True
 
 # Grid dimensions
 GRID_DIM_X = 4
@@ -55,7 +55,7 @@ if VISUAL:
 if VISUAL:
     clock = pygame.time.Clock()
 timeSinceLastMove = 0
-MOVE_DELAY = 0  # ms
+MOVE_DELAY = 200  # ms
 PAUSE_DELAY = MOVE_DELAY * 2
 
 manager = GameManagerModule.GameManager(GRID_DIM_X, GRID_DIM_Y, NUM_TANKS)
@@ -98,6 +98,8 @@ while (witherPercentage > 0.1):
 
                 if (timeSinceLastMove >= MOVE_DELAY and not manager.isPaused):
                     autoClientManager.makeAutoDecision()
+                    if (not manager.isPausable):
+                        timeSinceLastMove = 0
                 if (timeSinceLastMove >= MOVE_DELAY + PAUSE_DELAY and manager.isPaused):
                     manager.resume()
                     timeSinceLastMove = 0
