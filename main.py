@@ -9,7 +9,7 @@ import GameManagerMapper
 import AutoClientManager
 
 HANDS_ON = False
-VISUAL = True
+VISUAL = False
 
 # Grid dimensions
 GRID_DIM_X = 4
@@ -52,7 +52,8 @@ if VISUAL:
 
 
 # Used to manage how fast the screen updates
-clock = pygame.time.Clock()
+if VISUAL:
+    clock = pygame.time.Clock()
 timeSinceLastMove = 0
 MOVE_DELAY = 0  # ms
 PAUSE_DELAY = MOVE_DELAY * 2
@@ -92,13 +93,16 @@ while (witherPercentage > 0.1):
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     inputMapper.mapMouseEvent(event)
         if not HANDS_ON:
-            timeSinceLastMove += clock.get_time()
+            if VISUAL:
+                timeSinceLastMove += clock.get_time()
 
-            if (timeSinceLastMove >= MOVE_DELAY and not manager.isPaused):
+                if (timeSinceLastMove >= MOVE_DELAY and not manager.isPaused):
+                    autoClientManager.makeAutoDecision()
+                if (timeSinceLastMove >= MOVE_DELAY + PAUSE_DELAY and manager.isPaused):
+                    manager.resume()
+                    timeSinceLastMove = 0
+            else: 
                 autoClientManager.makeAutoDecision()
-            if (timeSinceLastMove >= MOVE_DELAY + PAUSE_DELAY and manager.isPaused):
-                manager.resume()
-                timeSinceLastMove = 0
 
         if VISUAL:
 
@@ -175,11 +179,11 @@ while (witherPercentage > 0.1):
 
                     # endregion
 
-        # Limit to 60 frames per second
-        clock.tick(60)
+            # Limit to 60 frames per second
+            clock.tick(60)
 
         # Go ahead and update the screen with what we've drawn.
-        if VISUAL:
+
             pygame.display.flip()
 
         done = done or manager.isAWin

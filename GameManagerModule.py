@@ -7,7 +7,7 @@ class GameManager:
     def __init__(self, DIM_X, DIM_Y, numOfTanks):
         self.dimX = DIM_X
         self.dimY = DIM_Y
-        self.isPausable = True
+        self.isPausable = False
         self.numTanks = numOfTanks
         
     def reInit(self):
