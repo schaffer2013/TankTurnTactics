@@ -8,8 +8,8 @@ class Client:
         self.index = index
         self.brain = Brain(numPossibleActions)
 
-    def makeDecision(self, gameStatus):
-        return self.brain.makeDecision(gameStatus, True) # returns actionIndex
+    def makeDecision(self, gameStatus, possibleActions):
+        return self.brain.makeDecision(gameStatus, possibleActions, True) # returns actionIndex
 
 
     # def makeDecision(self, gameStatus, validActions):

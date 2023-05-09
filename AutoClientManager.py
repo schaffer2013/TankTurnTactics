@@ -33,7 +33,7 @@ class AutoClientManager:
         possibleActions = self.mapper.getActionValidations()
         activeClient = self.allClients[gameStatus.activeTankIndex]
 
-        action = activeClient.makeDecision(gameStatus)
+        action = activeClient.makeDecision(gameStatus, possibleActions)
         if (possibleActions[action]):
             self.mapper.mapAction(action)
         else:

@@ -2,7 +2,7 @@ import numpy as np
 import NeuralNet
 import copy
 
-LAYER_1_NODES = 60
+LAYER_1_NODES = 15
 
 
 class Brain:
@@ -17,15 +17,19 @@ class Brain:
     def reinitWeightsAndBiases(self, params):
         self.W1, self.b1, self.W2, self.b2 = params
 
-    def makeDecision(self, gameStatus, weightedDecision=False):
+    def makeDecision(self, gameStatus, possibleActions, weightedDecision=False):
         ngs = self.normalizeGameStatus(gameStatus)
         weightedActions, one_hot, actionIndex = NeuralNet.forwardPropAndOneHot(
             self.W1, self.b1, self.W2, self.b2, ngs)
         if weightedDecision:
-            randomChoice = np.random.rand()
+            weightedAndPossible = []
+            for i in range(len(possibleActions)):
+                weightedAndPossible.append(possibleActions[i] * weightedActions[i])
+            s = sum(weightedAndPossible)
+            randomChoice = np.random.rand() * s
             runningValue = 0.0
-            for i in range(len(weightedActions)):
-                runningValue += weightedActions[i]
+            for i in range(len(weightedAndPossible)):
+                runningValue += weightedAndPossible[i]
                 if (runningValue) > randomChoice:
                     return i
         return actionIndex
