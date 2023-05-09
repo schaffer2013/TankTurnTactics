@@ -10,7 +10,8 @@ class AutoClientManager:
         self.allClients = []
         for i in range(gameStatus.numTanks):
             self.allClients.append(Client(i, self.mapper.highestCmdIndex + 1))
-            self.allClients[i].brain.initWeightsAndBiases(gameStatus)
+            ngs = self.allClients[i].normalizeGameStatus(gameStatus)
+            self.allClients[i].brain.initWeightsAndBiases(ngs)
 
     def reInit(self, newGen):
         self.allClients = []
@@ -25,6 +26,7 @@ class AutoClientManager:
     def exportWeights(self):
         self.allSavedClientParams = []
         for i in range(len(self.allClients)):
+            self.allClients[i].brain.learn()
             self.allSavedClientParams.append(
                 self.allClients[i].brain.exportParams())
 

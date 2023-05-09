@@ -1,4 +1,6 @@
 import random
+import numpy as np
+import copy
 import Strategy
 from Brain import Brain
 
@@ -9,8 +11,44 @@ class Client:
         self.brain = Brain(numPossibleActions)
 
     def makeDecision(self, gameStatus, possibleActions):
-        return self.brain.makeDecision(gameStatus, possibleActions, True) # returns actionIndex
+        ngs = self.normalizeGameStatus(gameStatus)
+        # returns actionIndex
+        return self.brain.makeDecision(ngs, possibleActions, True)
 
+    def normalizeGameStatus(self, gameStatus):
+        def myFunc(e):
+            return (e.index - gameStatus.activeTankIndex) % gameStatus.numTanks
+        # Stub out:
+        # For each tank, starting with active and looping
+        # to the tank that just acted: (not absolute index!)
+        #   -isAlive (bool) (not necessary for active)
+        #   -extraLives/2.0
+        #   -positionX/DIM_X
+        #   -positionY/DIM_Y
+        #   -min(range/max(DIM_X, DIM_Y), 1.0)
+        #   -min(actionPoints/10.0, 1.0) * isAlive
+        # Just once:
+        #   -1/max(DIM_X, DIM_Y)
+        allParams = []
+        allTanksCopy = copy.deepcopy(gameStatus.AllTanks)
+        allTanksCopy.sort(key=myFunc)
+        for t in allTanksCopy:
+            allParams.extend(self.normalizeTankHelper(
+                t, gameStatus.dimX, gameStatus.dimY))
+        allParams.append(1.0/max(gameStatus.dimX, gameStatus.dimY))
+        return np.transpose(np.array([allParams]))
+
+    def normalizeTankHelper(self, tank, dimX, dimY):
+        maxDim = (max(dimX, dimY))
+        tankParams = []
+        tankParams.append(tank.isAlive * 1.0)
+        tankParams.append(tank.extra_lives / 2.0)
+        tankParams.append(float(tank.x) / dimX)
+        tankParams.append(float(tank.y) / dimY)
+        tankParams.append(min(float(tank.range) / maxDim, 1.0))
+        tankParams.append(min(float(tank.actionPoints) /
+                          10.0, 1.0) * float(tank.isAlive))
+        return tankParams
 
     # def makeDecision(self, gameStatus, validActions):
     #     restrictedValidActions = Strategy.pruneValidActions(

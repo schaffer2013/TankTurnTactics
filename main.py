@@ -9,10 +9,10 @@ import GameManagerMapper
 import AutoClientManager
 
 HANDS_ON = False
-VISUAL = True
+VISUAL = False
 
 # Grid dimensions
-GRID_DIM_X = 4
+GRID_DIM_X = 3
 GRID_DIM_Y = GRID_DIM_X  # Setting to "always square" for range normalization
 
 # This sets the WIDTH and HEIGHT of each grid location
@@ -25,7 +25,7 @@ HEIGHT = int(TOTAL_HEIGHT/GRID_DIM_Y)
 MARGIN = int(min(WIDTH, HEIGHT)/10)
 
 # Number of initial tanks
-NUM_TANKS = 4
+NUM_TANKS = 3
 
 # Create a 2 dimensional array. A two dimensional
 # array is simply a list of lists.
