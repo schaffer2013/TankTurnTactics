@@ -1,11 +1,5 @@
 import numpy as np
 
-# placeholder input data
-# NUM_INPUT_DATA = 15
-# INPUT_DATA = np.random.rand(NUM_INPUT_DATA, 1)
-# NODES_LAYER_1 = 12
-# NUM_OUTPUTS = 14
-
 # Params for randomization
 STANDARD_DEV = 0.0001
 np.seterr(all='raise')
@@ -101,8 +95,6 @@ def update_params(W1, b1, W2, b2, dW1, db1, dW2, db2, alpha):
     b2 = b2 + alpha * db2
     return W1, b1, W2, b2
 
-# region Test
-
 
 # Example code from YT -----
 # https://www.kaggle.com/code/wwsalmon/simple-mnist-nn-from-scratch-numpy-no-tf-keras/notebook
@@ -128,8 +120,6 @@ def gradient_descent(X, Y, params, alpha, iterations):
         #     predictions = get_predictions(A2)
         #     print(get_accuracy(predictions, Y))
     return W1, b1, W2, b2
-# endregion
-
 
 def forwardPropAndOneHot(W1, b1, W2, b2, input):
     Z1, A1, Z2, A2 = forward_prop(W1, b1, W2, b2, input)
