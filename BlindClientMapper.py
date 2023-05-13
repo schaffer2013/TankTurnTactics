@@ -20,7 +20,6 @@ DONATE_TO_THIS_TANK_CMD = 1
 # This is simply the amount of commands that can be done
 NUM_TANK_SPEC_COMMANDS = 2
 
-
 class BlindMapper:
     def __init__(self, manager):
         self.gameManager = manager

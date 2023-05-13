@@ -17,7 +17,7 @@ class Client:
             ngs, possibleActions, fallbackAction, True)
         if (actionIndex == None):
             a = 3
-        return self.brain.makeDecision(ngs, possibleActions, fallbackAction, True)
+        return self.brain.makeDecision(ngs, possibleActions, fallbackAction, True), ngs
 
     def normalizeGameStatus(self, gameStatus):
         def myFunc(e):
@@ -36,6 +36,8 @@ class Client:
         allParams = []
         allTanksCopy = copy.deepcopy(gameStatus.AllTanks)
         allTanksCopy.sort(key=myFunc)
+        if (allTanksCopy[0].index != gameStatus.activeTankIndex):
+            reaction = "Yell"
         for t in allTanksCopy:
             allParams.extend(self.normalizeTankHelper(
                 t, gameStatus.dimX, gameStatus.dimY))

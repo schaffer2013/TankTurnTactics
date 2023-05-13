@@ -2,7 +2,7 @@ import numpy as np
 import NeuralNet
 import copy
 
-LAYER_1_NODES = 500
+LAYER_1_NODES = 150
 
 
 class Brain:

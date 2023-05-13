@@ -1,5 +1,9 @@
+import random
 import BlindClientMapper
 from AutoClient import Client
+
+# Use this to export a subset of possibilities
+CHANCE_FOR_EXAMPLE = 0.05
 
 
 class AutoClientManager:
@@ -12,6 +16,8 @@ class AutoClientManager:
             self.allClients.append(Client(i, self.mapper.highestCmdIndex + 1))
             ngs = self.allClients[i].normalizeGameStatus(gameStatus)
             self.allClients[i].brain.initWeightsAndBiases(ngs)
+
+        self.trainingPossibleActions = []
 
     def reInit(self, newGen):
         self.allClients = []
@@ -33,12 +39,20 @@ class AutoClientManager:
                 self.allClients[i].brain.exportParams())
         return self.allSavedClientParams[winnerIndex]
 
+    def exportTrainingSet(self):
+        l = len(self.trainingPossibleActions)
+        return self.trainingPossibleActions
+
     def makeAutoDecision(self):
         gameStatus = self.mapper.getStatus()
         possibleActions = self.mapper.getActionValidations()
         activeClient = self.allClients[gameStatus.activeTankIndex]
 
-        action = activeClient.makeDecision(gameStatus, possibleActions, BlindClientMapper.WITHER_CMD)
+        action, ngs = activeClient.makeDecision(
+            gameStatus, possibleActions, BlindClientMapper.WITHER_CMD)
+        if (random.random() < CHANCE_FOR_EXAMPLE):
+            self.trainingPossibleActions.append([ngs, possibleActions])
+
         if (possibleActions[action]):
             self.mapper.mapAction(action)
         else:

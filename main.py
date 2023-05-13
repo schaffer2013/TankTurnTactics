@@ -1,6 +1,7 @@
 import random
 import os
 import pygame
+import Brain
 import Lin
 import pickle
 import jsonpickle
@@ -11,13 +12,14 @@ import AutoClientManager
 import datetime
 
 def getFileNameHelper(numTanks, dim):
-    return(f'weights-{str(numTanks)}tanks-{str(dim)}dim.pkl')
+    return(f'weights-{str(numTanks)}tanks-{str(dim)}dim-{str(Brain.LAYER_1_NODES)}-L1Nodes.pkl')
 
 HANDS_ON = False
 VISUAL = False
+EPOCH_COUNT = 1000
 
 # Grid dimensions
-GRID_DIM_X = 10
+GRID_DIM_X = 15
 GRID_DIM_Y = GRID_DIM_X  # Setting to "always square" for range normalization
 
 # This sets the WIDTH and HEIGHT of each grid location
@@ -80,7 +82,7 @@ witherList = []
 timeout = False
 
 # while (witherPercentage > 0.001):
-while epochNumber < 100000 or timeout or witherPercentage < 0.05:
+while epochNumber < EPOCH_COUNT or timeout or witherPercentage < 0.05:
     print("________")
     print(f'Epoch {epochNumber}')
     startTime = datetime.datetime.now()
@@ -237,7 +239,7 @@ while epochNumber < 100000 or timeout or witherPercentage < 0.05:
     for i in range(len(manager.deadTankIndices)):
         # Add 1 possible new gen for each tank, and one for
         # each tank that died before it. The last tank has the
-        # most in the pool.
+        # most in the pool. Or just play around with the numbers.
         newPopulationPool.extend([manager.deadTankIndices[i]] * (i+1))
 
     if not done:
@@ -253,6 +255,11 @@ while epochNumber < 100000 or timeout or witherPercentage < 0.05:
 
             # A new file will be created
             pickle.dump(bestPerformer, file)
+
+        with open('POSS-' + getFileNameHelper(NUM_TANKS, GRID_DIM_X), 'wb') as file:
+
+            # A new file will be created
+            pickle.dump(autoClientManager.exportTrainingSet(), file)
 
     elapsedTime = datetime.datetime.now() - startTime
     print(f'Elapsed time: {elapsedTime}')   
