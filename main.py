@@ -1,8 +1,7 @@
 import random
-import os
 import pygame
 import Brain
-import Lin
+import FileHelper
 import pickle
 import jsonpickle
 import GameManagerModule
@@ -11,8 +10,10 @@ import GameManagerMapper
 import AutoClientManager
 import datetime
 
+
 def getFileNameHelper(numTanks, dim):
     return(f'weights-{str(numTanks)}tanks-{str(dim)}dim-{str(Brain.LAYER_1_NODES)}-L1Nodes.pkl')
+
 
 HANDS_ON = False
 VISUAL = False
@@ -70,9 +71,8 @@ manager.reInit()
 inputMapper = GameManagerMapper.OmnipotentMapper(
     manager, WIDTH, HEIGHT, MARGIN)
 autoClientManager = AutoClientManager.AutoClientManager(manager)
-
-if (os.path.isfile(getFileNameHelper(NUM_TANKS, GRID_DIM_X))):
-    aff = 1
+fileHelper = FileHelper.FileHelper(NUM_TANKS, max(
+    GRID_DIM_X, GRID_DIM_Y), Brain.LAYER_1_NODES)
 
 # -------- Outside loop for epochs ------- #
 witherPercentage = 1.0
@@ -250,19 +250,12 @@ while epochNumber < EPOCH_COUNT or timeout or witherPercentage < 0.05:
 
     epochNumber += 1
 
-    if epochNumber % 20 == 0 :
-        with open(getFileNameHelper(NUM_TANKS, GRID_DIM_X), 'wb') as file:
-
-            # A new file will be created
-            pickle.dump(bestPerformer, file)
-
-        with open('POSS-' + getFileNameHelper(NUM_TANKS, GRID_DIM_X), 'wb') as file:
-
-            # A new file will be created
-            pickle.dump(autoClientManager.exportTrainingSet(), file)
+    if epochNumber % 20 == 0:
+        fileHelper.fileDumpWeights(bestPerformer)
+        fileHelper.fileDumpPossibilities(autoClientManager.exportTrainingSet())
 
     elapsedTime = datetime.datetime.now() - startTime
-    print(f'Elapsed time: {elapsedTime}')   
+    print(f'Elapsed time: {elapsedTime}')
 
 #----------------#
 
