@@ -1,18 +1,23 @@
 import random
+import os
 import pygame
 import Lin
-import numpy as np
+import pickle
 import jsonpickle
 import GameManagerModule
 import ScreenHelper
 import GameManagerMapper
 import AutoClientManager
+import datetime
+
+def getFileNameHelper(numTanks, dim):
+    return(f'weights-{str(numTanks)}tanks-{str(dim)}dim.pkl')
 
 HANDS_ON = False
 VISUAL = False
 
 # Grid dimensions
-GRID_DIM_X = 3
+GRID_DIM_X = 10
 GRID_DIM_Y = GRID_DIM_X  # Setting to "always square" for range normalization
 
 # This sets the WIDTH and HEIGHT of each grid location
@@ -25,7 +30,7 @@ HEIGHT = int(TOTAL_HEIGHT/GRID_DIM_Y)
 MARGIN = int(min(WIDTH, HEIGHT)/10)
 
 # Number of initial tanks
-NUM_TANKS = 3
+NUM_TANKS = 10
 
 # Create a 2 dimensional array. A two dimensional
 # array is simply a list of lists.
@@ -64,22 +69,32 @@ inputMapper = GameManagerMapper.OmnipotentMapper(
     manager, WIDTH, HEIGHT, MARGIN)
 autoClientManager = AutoClientManager.AutoClientManager(manager)
 
+if (os.path.isfile(getFileNameHelper(NUM_TANKS, GRID_DIM_X))):
+    aff = 1
+
 # -------- Outside loop for epochs ------- #
 witherPercentage = 1.0
-epochNumber = -1
+epochNumber = 0
 epochList = []
 witherList = []
+timeout = False
 
-while (witherPercentage > 0.1):
+# while (witherPercentage > 0.001):
+while epochNumber < 100000 or timeout or witherPercentage < 0.05:
     print("________")
-    epochNumber += 1
     print(f'Epoch {epochNumber}')
+    startTime = datetime.datetime.now()
+    print(f'Start time: {startTime}')
 
     # Loop until the user clicks the close button.
     done = False
 
     # -------- Main Program Loop -----------
     while not done:
+        timeDiff = datetime.datetime.now() - startTime
+        elapsedTimeInMin = minutes = timeDiff.total_seconds() / 60
+        timeout = elapsedTimeInMin >= 10
+        done = done or timeout
 
         gameStatus = jsonpickle.decode(manager.getFullGameStatus())
 
@@ -103,7 +118,7 @@ while (witherPercentage > 0.1):
                 if (timeSinceLastMove >= MOVE_DELAY + PAUSE_DELAY and manager.isPaused):
                     manager.resume()
                     timeSinceLastMove = 0
-            else: 
+            else:
                 autoClientManager.makeAutoDecision()
 
         if VISUAL:
@@ -205,17 +220,17 @@ while (witherPercentage > 0.1):
     # See epoch trend
     epochList.append(epochNumber)
     witherList.append(witherPercentage)
-    if (len(epochList) >= 3):
-        m, m_res, b, b_res = Lin.fit(epochList, witherList)
-        print("slope: %.4f +/- %.4f" % (m, m_res))
-        if (abs(m) < abs(m_res)):
-            print("insignificant")
-        else:
-            print("SIGNIFICANT")
+    # if (len(epochList) >= 3):
+    #     m, m_res, b, b_res = Lin.fit(epochList, witherList)
+    #     print("slope: %.4f +/- %.4f" % (m, m_res))
+    #     if (abs(m) < abs(m_res)):
+    #         print("insignificant")
+    #     else:
+    #         print("SIGNIFICANT")
 
     # After single game loop between epochs--------------
     # Save old brain params
-    autoClientManager.exportWeights()
+    bestPerformer = autoClientManager.exportWeights()
 
     # Get next gen population
     newPopulationPool = []
@@ -225,12 +240,26 @@ while (witherPercentage > 0.1):
         # most in the pool.
         newPopulationPool.extend([manager.deadTankIndices[i]] * (i+1))
 
-    random.shuffle(newPopulationPool)
-    newGen = newPopulationPool[:NUM_TANKS]
-    autoClientManager.reInit(newGen)
+    if not done:
+        random.shuffle(newPopulationPool)
+        newGen = newPopulationPool[:NUM_TANKS]
+        autoClientManager.reInit(newGen)
     manager.reInit()
 
+    epochNumber += 1
+
+    if epochNumber % 20 == 0 :
+        with open(getFileNameHelper(NUM_TANKS, GRID_DIM_X), 'wb') as file:
+
+            # A new file will be created
+            pickle.dump(bestPerformer, file)
+
+    elapsedTime = datetime.datetime.now() - startTime
+    print(f'Elapsed time: {elapsedTime}')   
+
 #----------------#
+
+
 # Be IDLE friendly. If you forget this line, the program will 'hang'
 # on exit.
 pygame.quit()

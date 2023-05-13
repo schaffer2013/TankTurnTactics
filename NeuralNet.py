@@ -7,7 +7,8 @@ import numpy as np
 # NUM_OUTPUTS = 14
 
 # Params for randomization
-STANDARD_DEV = 0.005
+STANDARD_DEV = 0.0001
+np.seterr(all='raise')
 
 
 def init_params(numInputs, layer1Nodes, numOutputs):
@@ -27,8 +28,20 @@ def sig(Z):
 
 
 def softmax(Z):
-    A = np.exp(Z) / sum(np.exp(Z))
+    if np.max(Z) > 100.0:
+        a = 1
+    try:
+        A = np.exp(Z) / sum(np.exp(Z))
+    except:
+        A = 1.0 * (Z == np.max(Z)) + 0.001
     return A
+
+
+def robust_softmax(Z):
+    """Compute softmax for each element in x in
+    a robust way to avoid underflow and overflow. """
+    z = Z - np.max(Z)
+    return np.exp(z) / np.sum(np.exp(z), axis=0)
 
 
 def forward_prop(W1, b1, W2, b2, X):
@@ -62,16 +75,16 @@ def wiggleValues(vals):
     return mutatedWeights
 
 
-def one_hot(Y):
-    one_hot_Y = np.zeros((Y.size, Y.max() + 1))
+def one_hot(Y, A):
+    one_hot_Y = np.zeros((Y.size, A.shape[0]))
     one_hot_Y[np.arange(Y.size), Y] = 1
     one_hot_Y = one_hot_Y.T
     return one_hot_Y
 
 
 def backward_prop(Z1, A1, Z2, A2, W1, W2, X, Y):
-    m = Y.shape[0] #TODO Check this
-    one_hot_Y = one_hot(Y)
+    m = Y.shape[0]  # TODO Check this
+    one_hot_Y = one_hot(Y, A2)
     dZ2 = A2 - one_hot_Y
     dW2 = 1 / m * dZ2.dot(A1.T)
     db2 = 1 / m * np.sum(dZ2)
@@ -82,13 +95,13 @@ def backward_prop(Z1, A1, Z2, A2, W1, W2, X, Y):
 
 
 def update_params(W1, b1, W2, b2, dW1, db1, dW2, db2, alpha):
-    W1 = W1 - alpha * dW1
-    b1 = b1 - alpha * db1
-    W2 = W2 - alpha * dW2
-    b2 = b2 - alpha * db2
+    W1 = W1 + alpha * dW1
+    b1 = b1 + alpha * db1
+    W2 = W2 + alpha * dW2
+    b2 = b2 + alpha * db2
     return W1, b1, W2, b2
 
-#region Test
+# region Test
 
 
 # Example code from YT -----
@@ -97,22 +110,26 @@ def update_params(W1, b1, W2, b2, dW1, db1, dW2, db2, alpha):
 def get_predictions(A2):
     return np.argmax(A2, 0)
 
+
 def get_accuracy(predictions, Y):
-    print(predictions, Y)
+    #print(predictions, Y)
     return np.sum(predictions == Y) / Y.size
 
-def gradient_descent(X, Y, alpha, iterations):
-    W1, b1, W2, b2 = init_params()
+
+def gradient_descent(X, Y, params, alpha, iterations):
+    W1, b1, W2, b2 = params
     for i in range(iterations):
         Z1, A1, Z2, A2 = forward_prop(W1, b1, W2, b2, X)
         dW1, db1, dW2, db2 = backward_prop(Z1, A1, Z2, A2, W1, W2, X, Y)
-        W1, b1, W2, b2 = update_params(W1, b1, W2, b2, dW1, db1, dW2, db2, alpha)
-        if i % 10 == 0:
-            print("Iteration: ", i)
-            predictions = get_predictions(A2)
-            print(get_accuracy(predictions, Y))
+        W1, b1, W2, b2 = update_params(
+            W1, b1, W2, b2, dW1, db1, dW2, db2, alpha)
+        # if i % 10 == 0:
+        #     print("Iteration: ", i)
+        #     predictions = get_predictions(A2)
+        #     print(get_accuracy(predictions, Y))
     return W1, b1, W2, b2
-#endregion
+# endregion
+
 
 def forwardPropAndOneHot(W1, b1, W2, b2, input):
     Z1, A1, Z2, A2 = forward_prop(W1, b1, W2, b2, input)

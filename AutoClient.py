@@ -10,10 +10,14 @@ class Client:
         self.index = index
         self.brain = Brain(numPossibleActions)
 
-    def makeDecision(self, gameStatus, possibleActions):
+    def makeDecision(self, gameStatus, possibleActions, fallbackAction):
         ngs = self.normalizeGameStatus(gameStatus)
         # returns actionIndex
-        return self.brain.makeDecision(ngs, possibleActions, True)
+        actionIndex = self.brain.makeDecision(
+            ngs, possibleActions, fallbackAction, True)
+        if (actionIndex == None):
+            a = 3
+        return self.brain.makeDecision(ngs, possibleActions, fallbackAction, True)
 
     def normalizeGameStatus(self, gameStatus):
         def myFunc(e):

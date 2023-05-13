@@ -35,6 +35,8 @@ class BlindMapper:
 
     def mapAction(self, cmdIndex):
         # TODO Replace prints with manager actions
+        if self.gameManager.checkWin():
+            return True
         if (cmdIndex == PASS_CMD):
             self.printDebug("Pass")
             self.gameManager.increaseActiveTankIndex()
@@ -95,7 +97,7 @@ class BlindMapper:
         isValid[MOVE_DOWN_CMD] = gameStatus.canMoveActiveTank(0, 1)
 
         # Can Increase Range
-        isValid[INCREASE_RANGE_CMD] = True
+        isValid[INCREASE_RANGE_CMD] = gameStatus.dimX > activeTank.range
 
         # Can Wither
         isValid[WITHER_CMD] = True
@@ -110,7 +112,7 @@ class BlindMapper:
                 canHit = gameStatus.canShootOrDonate(t.index)
 
             isValid[self.getShootCmdIndex(t.index)] = canHit
-            isValid[self.getDonateCmdIndex(t.index)] = canHit
+            isValid[self.getDonateCmdIndex(t.index)] = False
         # endregion
         return isValid
 

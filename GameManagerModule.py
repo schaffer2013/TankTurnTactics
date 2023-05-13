@@ -81,6 +81,13 @@ class GameManager:
         self.isPaused = False
         self.increaseActiveTankIndexSub()
 
+    def checkWin(self):
+        if (len(self.getAliveTanks()) <= 1):
+            self.isAWin = True
+            self.winningTank = self.activeTankIndex
+            self.deadTankIndices.append(self.winningTank)
+        return self.isAWin
+
     def increaseActiveTankIndexSub(self):
         if self.isAWin:
             return
@@ -197,10 +204,6 @@ class GameManager:
         if (target.extra_lives == 0):
             target.isAlive = False
             self.deadTankIndices.append(target.index)
-            if (len(self.getAliveTanks()) <= 1):
-                self.isAWin = True
-                self.winningTank = self.activeTankIndex
-                self.deadTankIndices.append(self.winningTank)
         else:
             target.extra_lives -= 1
         self.decreaseActiveTankActionPoints()
@@ -218,7 +221,8 @@ class GameManager:
     def witherActiveTank(self):
         self.numActionsTaken += 1
         self.numWithersTaken += 1
-        self.decreaseActiveTankActionPoints()
+        self.shoot(self.getActiveTank())
+        #self.decreaseActiveTankActionPoints()
 
     def manhattanDistance(self, xy1, xy2):
         return abs(xy1[0]-xy2[0]) + abs(xy1[1]-xy2[1])

@@ -24,18 +24,21 @@ class AutoClientManager:
         a = 1
 
     def exportWeights(self):
+        gameStatus = self.mapper.getStatus()
+        winnerIndex = gameStatus.winningTank
         self.allSavedClientParams = []
         for i in range(len(self.allClients)):
             self.allClients[i].brain.learn()
             self.allSavedClientParams.append(
                 self.allClients[i].brain.exportParams())
+        return self.allSavedClientParams[winnerIndex]
 
     def makeAutoDecision(self):
         gameStatus = self.mapper.getStatus()
         possibleActions = self.mapper.getActionValidations()
         activeClient = self.allClients[gameStatus.activeTankIndex]
 
-        action = activeClient.makeDecision(gameStatus, possibleActions)
+        action = activeClient.makeDecision(gameStatus, possibleActions, BlindClientMapper.WITHER_CMD)
         if (possibleActions[action]):
             self.mapper.mapAction(action)
         else:
