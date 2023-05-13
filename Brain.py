@@ -17,7 +17,6 @@ class Brain:
         c = 1
 
     def initWeightsAndBiases(self, exampleNormGameStatus):
-
         self.W1, self.b1, self.W2, self.b2 = NeuralNet.init_params(
             len(exampleNormGameStatus), LAYER_1_NODES, self.numActions)
 
@@ -73,6 +72,22 @@ class Brain:
             (self.W1, self.b1, self.W2, self.b2) = NeuralNet.gradient_descent(
                 shaped, a, oldParams, 0.01, 1)
         c = 1
+
+    def learnRaw(self, inputData, outputData, learningRate=0.01, iterations=1):
+        oldParams = (self.W1, self.b1, self.W2, self.b2)
+
+        X = np.array(inputData)
+        Y = np.array(outputData)
+        Y = self.reshape(Y, 2)
+        if (Y.size > 0):
+            (self.W1, self.b1, self.W2, self.b2) = NeuralNet.gradient_descent(
+                X, Y, oldParams, learningRate, iterations, useOneHot=False)
+        c = 1
+
+    def reshape(self, data, neededDims):
+        while data.ndim < neededDims:
+            data = np.expand_dims(data, axis=data.ndim)
+        return data
 
     def exportParams(self):
         return (self.W1, self.b1, self.W2, self.b2)
