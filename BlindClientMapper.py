@@ -111,7 +111,7 @@ class BlindMapper:
                 canHit = gameStatus.canShootOrDonate(t.index)
 
             isValid[self.getShootCmdIndex(t.index)] = canHit
-            isValid[self.getDonateCmdIndex(t.index)] = False
+            isValid[self.getDonateCmdIndex(t.index)] = canHit
         # endregion
         return isValid
 

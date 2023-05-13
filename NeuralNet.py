@@ -121,6 +121,7 @@ def gradient_descent(X, Y, params, alpha, iterations):
         #     print(get_accuracy(predictions, Y))
     return W1, b1, W2, b2
 
+
 def forwardPropAndOneHot(W1, b1, W2, b2, input):
     Z1, A1, Z2, A2 = forward_prop(W1, b1, W2, b2, input)
     return getForwardOneHot(A2)

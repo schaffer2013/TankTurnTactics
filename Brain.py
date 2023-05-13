@@ -32,8 +32,6 @@ class Brain:
         weightedActions, one_hot, actionIndex = NeuralNet.forwardPropAndOneHot(
             self.W1, self.b1, self.W2, self.b2, ngs)
         if weightedDecision:
-            if len(weightedActions) != len(possibleActions):
-                fff = 3333
             weightedAndPossible = []
             for i in range(len(possibleActions)):
                 weightedAndPossible.append(

@@ -11,7 +11,7 @@ class FileHelper:
         self.L1Nodes = L1Nodes
 
     def getFileNameWeights(self):
-        return(f'weights-{str(self.numTanks)}tanks-{str(self.dim)}dim-{str(self.L1Nodes)}-L1Nodes.pkl')
+        return(f'weights-{str(self.numTanks)}tanks-{str(self.dim)}dim-{str(self.L1Nodes)}L1Nodes.pkl')
 
     def getFileNamePossibilities(self):
         return POSS_FILE_PREFIX + self.getFileNameWeights()
