@@ -4,6 +4,12 @@ import numpy as np
 STANDARD_DEV = 0.0001
 np.seterr(all='raise')
 
+W_INDEX = 0
+B_INDEX = 1
+
+Z_INDEX = 0
+A_INDEX = 1
+
 
 def init_params(numInputs, allLayerNodes, numOutputs):
     wAndB = []
@@ -48,13 +54,36 @@ def robust_softmax(Z):
     z = Z - np.max(Z)
     return np.exp(z) / np.sum(np.exp(z), axis=0)
 
+# def forward_prop(W1, b1, W2, b2, X):
 
-def forward_prop(W1, b1, W2, b2, X):
-    Z1 = W1.dot(X) + b1
-    A1 = ReLU(Z1)
-    Z2 = W2.dot(A1) + b2
-    A2 = softmax(Z2)
-    return Z1, A1, Z2, A2
+
+def forward_prop(weightsAndBiases, X):
+    numHiddenLayers = len(weightsAndBiases) - 1
+    zAndA = []
+    # input to first HL
+    W = weightsAndBiases[0][W_INDEX]
+    b = weightsAndBiases[0][B_INDEX]
+    Z = W.dot(X) + b
+    A = ReLU(Z)
+    zAndA.append([Z, A])
+
+    # HL to HL
+    for i in range(1, numHiddenLayers):
+        lastA = zAndA[-1][A_INDEX]
+        W = weightsAndBiases[i][W_INDEX]
+        b = weightsAndBiases[i][B_INDEX]
+        Z = W.dot(lastA) + b
+        A = ReLU(Z)
+        zAndA.append([Z, A])
+
+    # HL to output
+    lastA = zAndA[-1][A_INDEX]
+    W = weightsAndBiases[numHiddenLayers][W_INDEX]
+    b = weightsAndBiases[numHiddenLayers][B_INDEX]
+    Z = W.dot(lastA) + b
+    A = softmax(Z)
+    zAndA.append([Z, A])
+    return zAndA
 
 
 def reshape(data, neededDims):
@@ -157,9 +186,9 @@ def gradient_descent(X, Y, params, alpha, iterations, useOneHot=True):
     return W1, b1, W2, b2, sse, A2
 
 
-def forwardPropAndOneHot(W1, b1, W2, b2, input):
-    Z1, A1, Z2, A2 = forward_prop(W1, b1, W2, b2, input)
-    return getForwardOneHot(A2)
+def forwardPropAndOneHot(weightsAndBiases, input):
+    zAndA = forward_prop(weightsAndBiases, input)
+    return getForwardOneHot(zAndA[-1][A_INDEX])
 
 
 # W1, b1, W2, b2 = init_params()

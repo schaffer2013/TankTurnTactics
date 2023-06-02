@@ -32,7 +32,7 @@ class Brain:
             possibleActions = allActionsPossible
 
         weightedActions, one_hot, actionIndex = NeuralNet.forwardPropAndOneHot(
-            self.W1, self.b1, self.W2, self.b2, ngs)
+            self.weightsAndBiases, ngs)
         if weightedDecision:
             weightedAndPossible = []
             for i in range(len(possibleActions)):
