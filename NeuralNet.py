@@ -26,6 +26,8 @@ def softmax(Z):
         a = 1
     try:
         A = np.exp(Z) / sum(np.exp(Z))
+        s = np.sum(A, axis=0)
+        
     except:
         A = 1.0 * (Z == np.max(Z)) + 0.001
     return A
@@ -44,6 +46,12 @@ def forward_prop(W1, b1, W2, b2, X):
     Z2 = W2.dot(A1) + b2
     A2 = softmax(Z2)
     return Z1, A1, Z2, A2
+
+
+def reshape(data, neededDims):
+    while data.ndim < neededDims:
+        data = np.expand_dims(data, axis=data.ndim)
+    return data
 
 
 def ReLU_deriv(Z):
@@ -82,20 +90,29 @@ def backward_prop(Z1, A1, Z2, A2, W1, W2, X, Y, useOneHot):
         one_hot_Y = one_hot(Y, A2)
         dZ2 = A2 - one_hot_Y
     else:
-        dZ2 = A2 - Y
+        #min = 10 ** -15
+        dZ2 = (A2 - Y)
+        # for r in range(dZ2.shape[0]):
+        #     for c in range(dZ2.shape[1]):
+        #         if abs(dZ2[r, c]) < min:
+        #             dZ2[r, c] = 0
+        #         else:
+        #             dZ2[r, c] = dZ2[r, c] ** 2
+        # #dZ2 = (A2 - Y) ** 2
     dW2 = 1 / m * dZ2.dot(A1.T)
+    err = np.sum(dZ2 ** 2)
     db2 = 1 / m * np.sum(dZ2)
     dZ1 = W2.T.dot(dZ2) * ReLU_deriv(Z1)
     dW1 = 1 / m * dZ1.dot(X.T)
     db1 = 1 / m * np.sum(dZ1)
-    return dW1, db1, dW2, db2
+    return dW1, db1, dW2, db2, err
 
 
 def update_params(W1, b1, W2, b2, dW1, db1, dW2, db2, alpha):
-    W1 = W1 + alpha * dW1
-    b1 = b1 + alpha * db1
-    W2 = W2 + alpha * dW2
-    b2 = b2 + alpha * db2
+    W1 = W1 - alpha * dW1
+    b1 = b1 - alpha * db1
+    W2 = W2 - alpha * dW2
+    b2 = b2 - alpha * db2
     return W1, b1, W2, b2
 
 
@@ -112,17 +129,24 @@ def get_accuracy(predictions, Y):
 
 
 def gradient_descent(X, Y, params, alpha, iterations, useOneHot=True):
+    x = X[0, :]
     W1, b1, W2, b2 = params
-    for i in range(iterations):
-        Z1, A1, Z2, A2 = forward_prop(W1, b1, W2, b2, X)
-        dW1, db1, dW2, db2 = backward_prop(Z1, A1, Z2, A2, W1, W2, X, Y, useOneHot)
-        W1, b1, W2, b2 = update_params(
-            W1, b1, W2, b2, dW1, db1, dW2, db2, alpha)
-        # if i % 10 == 0:
-        #     print("Iteration: ", i)
-        #     predictions = get_predictions(A2)
-        #     print(get_accuracy(predictions, Y))
-    return W1, b1, W2, b2
+    # TODO implement for all (remove [0])
+
+
+    Z1, A1, Z2, A2 = forward_prop(W1, b1, W2, b2, X)
+    dW1, db1, dW2, db2, sse = backward_prop(
+        Z1, A1, Z2, A2, W1, W2, X, Y, useOneHot)
+    W1, b1, W2, b2 = update_params(
+        W1, b1, W2, b2, dW1, db1, dW2, db2, alpha)
+    if sse < 1.:
+        a = 3
+    #print(f'Error: {sse}')
+    # if i % 10 == 0:
+    #     print("Iteration: ", i)
+    #     predictions = get_predictions(A2)
+    #     print(get_accuracy(predictions, Y))
+    return W1, b1, W2, b2, sse, A2
 
 
 def forwardPropAndOneHot(W1, b1, W2, b2, input):

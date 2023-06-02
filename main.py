@@ -66,13 +66,14 @@ timeSinceLastMove = 0
 MOVE_DELAY = 200  # ms
 PAUSE_DELAY = MOVE_DELAY * 2
 
+fileHelper = FileHelper.FileHelper(NUM_TANKS, max(
+    GRID_DIM_X, GRID_DIM_Y), Brain.LAYER_1_NODES)
 manager = GameManagerModule.GameManager(GRID_DIM_X, GRID_DIM_Y, NUM_TANKS)
 manager.reInit()
 inputMapper = GameManagerMapper.OmnipotentMapper(
     manager, WIDTH, HEIGHT, MARGIN)
-autoClientManager = AutoClientManager.AutoClientManager(manager)
-fileHelper = FileHelper.FileHelper(NUM_TANKS, max(
-    GRID_DIM_X, GRID_DIM_Y), Brain.LAYER_1_NODES)
+autoClientManager = AutoClientManager.AutoClientManager(manager, fileHelper.undumpBaseWeights())
+
 
 # -------- Outside loop for epochs ------- #
 witherPercentage = 1.0

@@ -7,15 +7,18 @@ CHANCE_FOR_EXAMPLE = 0.05
 
 
 class AutoClientManager:
-    def __init__(self, manager):
+    def __init__(self, manager, baselineWeights = None):
         self.mapper = BlindClientMapper.BlindMapper(manager)
         gameStatus = self.mapper.getStatus()
 
         self.allClients = []
         for i in range(gameStatus.numTanks):
             self.allClients.append(Client(i, self.mapper.highestCmdIndex + 1))
-            ngs = self.allClients[i].normalizeGameStatus(gameStatus)
-            self.allClients[i].brain.initWeightsAndBiases(ngs)
+            if baselineWeights == None:
+                ngs = self.allClients[i].normalizeGameStatus(gameStatus)
+                self.allClients[i].brain.initWeightsAndBiases(ngs)
+            else:
+                self.allClients[i].brain.reinitWeightsAndBiases(baselineWeights)
 
         self.trainingPossibleActions = []
 
