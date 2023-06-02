@@ -5,12 +5,21 @@ STANDARD_DEV = 0.0001
 np.seterr(all='raise')
 
 
-def init_params(numInputs, layer1Nodes, numOutputs):
-    W1 = np.random.rand(layer1Nodes, numInputs) - 0.5
-    b1 = np.random.rand(layer1Nodes, 1) - 0.5
-    W2 = np.random.rand(numOutputs, layer1Nodes) - 0.5
-    b2 = np.random.rand(numOutputs, 1) - 0.5
-    return W1, b1, W2, b2
+def init_params(numInputs, allLayerNodes, numOutputs):
+    wAndB = []
+    numHiddenLayers = len(allLayerNodes)
+    W = np.random.rand(allLayerNodes[0], numInputs) - 0.5
+    b = np.random.rand(allLayerNodes[0], 1) - 0.5
+    wAndB.append([W, b])
+    if numHiddenLayers >= 2:
+        for i in range(1, numHiddenLayers):
+            W = np.random.rand(allLayerNodes[i], allLayerNodes[i-1]) - 0.5
+            b = np.random.rand(allLayerNodes[i], 1) - 0.5
+            wAndB.append([W, b])
+    W = np.random.rand(numOutputs, allLayerNodes[numHiddenLayers-1]) - 0.5
+    b = np.random.rand(numOutputs, 1) - 0.5
+    wAndB.append([W, b])
+    return wAndB
 
 
 def ReLU(Z):
@@ -27,7 +36,7 @@ def softmax(Z):
     try:
         A = np.exp(Z) / sum(np.exp(Z))
         s = np.sum(A, axis=0)
-        
+
     except:
         A = 1.0 * (Z == np.max(Z)) + 0.001
     return A
@@ -132,7 +141,6 @@ def gradient_descent(X, Y, params, alpha, iterations, useOneHot=True):
     x = X[0, :]
     W1, b1, W2, b2 = params
     # TODO implement for all (remove [0])
-
 
     Z1, A1, Z2, A2 = forward_prop(W1, b1, W2, b2, X)
     dW1, db1, dW2, db2, sse = backward_prop(

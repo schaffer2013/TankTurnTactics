@@ -6,13 +6,17 @@ BASE_FILE_PREFIX = 'BASE-'
 
 
 class FileHelper:
-    def __init__(self, numTanks, dim, L1Nodes):
+    def __init__(self, numTanks, dim, nodeCounts):
         self.numTanks = numTanks
         self.dim = dim
-        self.L1Nodes = L1Nodes
+        self.nodeCounts = nodeCounts
 
     def getFileNameWeights(self):
-        return(f'weights-{str(self.numTanks)}tanks-{str(self.dim)}dim-{str(self.L1Nodes)}L1Nodes.pkl')
+        runningString = f'weights-{str(self.numTanks)}tanks-{str(self.dim)}dim'#{str(self.L1Nodes)}L1Nodes.pkl'
+        for i in range(len(self.nodeCounts)):
+            runningString += f'-{str(self.nodeCounts[i])}L{i}Nodes'
+        runningString += '.pkl'
+        return runningString
 
     def getFileNamePossibilities(self):
         return POSS_FILE_PREFIX + self.getFileNameWeights()
@@ -50,5 +54,7 @@ class FileHelper:
         return self.undump(self.getFileNamePossibilities())
 
     def undump(self, fileName):
+        if not os.path.isfile(fileName):
+            return None
         file = open(fileName, 'rb')
         return pickle.load(file)

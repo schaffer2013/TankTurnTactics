@@ -6,9 +6,9 @@ from Brain import Brain
 
 
 class Client:
-    def __init__(self, index, numPossibleActions):
+    def __init__(self, index, numPossibleActions, nodeCounts):
         self.index = index
-        self.brain = Brain(numPossibleActions)
+        self.brain = Brain(numPossibleActions, nodeCounts)
 
     def makeDecision(self, gameStatus, possibleActions, fallbackAction):
         ngs = self.normalizeGameStatus(gameStatus)

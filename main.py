@@ -10,10 +10,7 @@ import GameManagerMapper
 import AutoClientManager
 import datetime
 
-
-def getFileNameHelper(numTanks, dim):
-    return(f'weights-{str(numTanks)}tanks-{str(dim)}dim-{str(Brain.LAYER_1_NODES)}-L1Nodes.pkl')
-
+NODE_COUNTS = [150, 125]
 
 HANDS_ON = False
 VISUAL = False
@@ -67,12 +64,13 @@ MOVE_DELAY = 200  # ms
 PAUSE_DELAY = MOVE_DELAY * 2
 
 fileHelper = FileHelper.FileHelper(NUM_TANKS, max(
-    GRID_DIM_X, GRID_DIM_Y), Brain.LAYER_1_NODES)
+    GRID_DIM_X, GRID_DIM_Y), NODE_COUNTS)
 manager = GameManagerModule.GameManager(GRID_DIM_X, GRID_DIM_Y, NUM_TANKS)
 manager.reInit()
 inputMapper = GameManagerMapper.OmnipotentMapper(
     manager, WIDTH, HEIGHT, MARGIN)
-autoClientManager = AutoClientManager.AutoClientManager(manager, fileHelper.undumpBaseWeights())
+autoClientManager = AutoClientManager.AutoClientManager(
+    manager, NODE_COUNTS, fileHelper.undumpBaseWeights())
 
 
 # -------- Outside loop for epochs ------- #

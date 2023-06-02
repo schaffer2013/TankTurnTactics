@@ -2,15 +2,17 @@ import numpy as np
 import NeuralNet
 import copy
 
-LAYER_1_NODES = 150
+#LAYER_1_NODES = 150
 
 
 class Brain:
-    def __init__(self, numActions):
+    def __init__(self, numActions, numNodesInLayers=[150]):
         self.numActions = numActions
         self.actionsTaken = []
         self.normGameStates = []
-        self.lastSse= 10 ** 15
+        self.numNodesInLayers = numNodesInLayers
+        self.weightsAndBiases = []
+        self.lastSse = 10 ** 15
 
     def injectTrainingExperiences(self, actions, ngs):
         a = actions
@@ -18,8 +20,8 @@ class Brain:
         c = 1
 
     def initWeightsAndBiases(self, exampleNormGameStatus):
-        self.W1, self.b1, self.W2, self.b2 = NeuralNet.init_params(
-            len(exampleNormGameStatus), LAYER_1_NODES, self.numActions)
+        self.weightsAndBiases = NeuralNet.init_params(
+            len(exampleNormGameStatus), self.numNodesInLayers, self.numActions)
 
     def reinitWeightsAndBiases(self, params):
         self.W1, self.b1, self.W2, self.b2 = params
@@ -80,7 +82,7 @@ class Brain:
             oldParams = (self.W1, self.b1, self.W2, self.b2)
 
             X = np.array(inputData).transpose()
-            for i in range (len(X)):
+            for i in range(len(X)):
                 if len(X[i]) != len(X[0]):
                     raise Exception("fsdfs")
             Y = np.array(outputData)
@@ -93,8 +95,6 @@ class Brain:
                     if LR < 0.000001:
                         return self.W1, self.b1, self.W2, self.b2
                 self.lastSse = sse
-
-        
 
     def exportParams(self):
         return (self.W1, self.b1, self.W2, self.b2)
