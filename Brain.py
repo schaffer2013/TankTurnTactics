@@ -72,7 +72,7 @@ class Brain:
         if (b.size > 0):
             shaped = b[:, :, 0].transpose()
             (self.weightsAndBiases, _, _) = NeuralNet.gradient_descent(
-                shaped, a, oldParams, 0.05, 1)
+                shaped, a, oldParams, 0.005, 1)
         c = 1
 
     def learnRaw(self, inputData, outputData, learningRate=0.0005, iterations=1):

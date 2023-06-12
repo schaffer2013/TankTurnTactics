@@ -60,6 +60,9 @@ def robust_softmax(Z):
 def forward_prop(weightsAndBiases, X):
     numHiddenLayers = len(weightsAndBiases) - 1
     zAndA = []
+    # initialize with input
+    Z_dummy = np.full_like(X, 0)
+    zAndA.append([Z_dummy, X])
     # input to first HL
     W = weightsAndBiases[0][W_INDEX]
     b = weightsAndBiases[0][B_INDEX]
@@ -152,27 +155,23 @@ def backward_prop(zAndA, weightsAndBiases, X, Y, useOneHot):
 
     dW = 1 / m * dZ.dot(secondLastZAndA[A_INDEX].T)
     err = np.sum(dZ ** 2)
-    db = [1 / m * np.sum(dZ)]
+    db = getDbHelper(dZ, m)
     derivativeWeightsAndBiases = []
     derivativeWeightsAndBiases = [[dW, db]] + derivativeWeightsAndBiases
 
     dZ = weightsAndBiases[-1][W_INDEX].T.dot(dZ) * ReLU_deriv(secondLastZAndA[Z_INDEX])
     # Middle
     for i in range(len(zAndA) - 1, 1, -1):
-        print(i)
-        dW = 1 / m * dZ.dot(zAndA[i-1][A_INDEX].T)
-        db = [1 / m * np.sum(dZ)]
+        dW = 1 / m * dZ.dot(zAndA[i-2][A_INDEX].T)
+        db = getDbHelper(dZ, m)
         derivativeWeightsAndBiases = [[dW, db]] + derivativeWeightsAndBiases
 
         wb = weightsAndBiases[i-2][W_INDEX].T.dot(dZ)
-        relu_d = ReLU_deriv(zAndA[i-1][Z_INDEX])
+        relu_d = ReLU_deriv(zAndA[i-2][Z_INDEX])
         dZ = wb * relu_d
 
     # First
 
-    dW = 1 / m * dZ.dot(X.T)
-    db = 1 / m * np.sum(dZ)
-    derivativeWeightsAndBiases = [[dW, db]] + derivativeWeightsAndBiases
     return derivativeWeightsAndBiases, err
 
 
@@ -187,6 +186,11 @@ def update_params(oldParams, dWB, alpha):
 
 # Example code from YT -----
 # https://www.kaggle.com/code/wwsalmon/simple-mnist-nn-from-scratch-numpy-no-tf-keras/notebook
+
+def getDbHelper(dZ, m):
+    db = 1 / m * np.sum(dZ, axis = 1)
+    db = np.expand_dims(db, axis = 1)
+    return db
 
 def get_predictions(A2):
     return np.argmax(A2, 0)
@@ -213,7 +217,7 @@ def gradient_descent(X, Y, weightsAndBiases, alpha, iterations, useOneHot=True):
     #     print("Iteration: ", i)
     #     predictions = get_predictions(A2)
     #     print(get_accuracy(predictions, Y))
-    return W1, b1, W2, b2, sse, A2
+    return newParams, sse, zAndA[-1][A_INDEX]
 
 
 def forwardPropAndOneHot(weightsAndBiases, input):
