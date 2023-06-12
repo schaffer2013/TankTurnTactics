@@ -128,30 +128,61 @@ def backward_prop(Z1, A1, Z2, A2, W1, W2, X, Y, useOneHot):
         one_hot_Y = one_hot(Y, A2)
         dZ2 = A2 - one_hot_Y
     else:
-        #min = 10 ** -15
         dZ2 = (A2 - Y)
-        # for r in range(dZ2.shape[0]):
-        #     for c in range(dZ2.shape[1]):
-        #         if abs(dZ2[r, c]) < min:
-        #             dZ2[r, c] = 0
-        #         else:
-        #             dZ2[r, c] = dZ2[r, c] ** 2
-        # #dZ2 = (A2 - Y) ** 2
     dW2 = 1 / m * dZ2.dot(A1.T)
     err = np.sum(dZ2 ** 2)
     db2 = 1 / m * np.sum(dZ2)
     dZ1 = W2.T.dot(dZ2) * ReLU_deriv(Z1)
+
     dW1 = 1 / m * dZ1.dot(X.T)
     db1 = 1 / m * np.sum(dZ1)
     return dW1, db1, dW2, db2, err
 
 
-def update_params(W1, b1, W2, b2, dW1, db1, dW2, db2, alpha):
-    W1 = W1 - alpha * dW1
-    b1 = b1 - alpha * db1
-    W2 = W2 - alpha * dW2
-    b2 = b2 - alpha * db2
-    return W1, b1, W2, b2
+def backward_prop(zAndA, weightsAndBiases, X, Y, useOneHot):
+    m = Y.shape[0]  # TODO Check this
+    # Last
+    lastZAndA = zAndA[-1]
+    secondLastZAndA = zAndA[-2]
+    if useOneHot:
+        one_hot_Y = one_hot(Y, lastZAndA[A_INDEX])
+        dZ = lastZAndA[A_INDEX] - one_hot_Y
+    else:
+        dZ = (lastZAndA[A_INDEX] - Y)
+
+    dW = 1 / m * dZ.dot(secondLastZAndA[A_INDEX].T)
+    err = np.sum(dZ ** 2)
+    db = [1 / m * np.sum(dZ)]
+    derivativeWeightsAndBiases = []
+    derivativeWeightsAndBiases = [[dW, db]] + derivativeWeightsAndBiases
+
+    dZ = weightsAndBiases[-1][W_INDEX].T.dot(dZ) * ReLU_deriv(secondLastZAndA[Z_INDEX])
+    # Middle
+    for i in range(len(zAndA) - 1, 1, -1):
+        print(i)
+        dW = 1 / m * dZ.dot(zAndA[i-1][A_INDEX].T)
+        db = [1 / m * np.sum(dZ)]
+        derivativeWeightsAndBiases = [[dW, db]] + derivativeWeightsAndBiases
+
+        wb = weightsAndBiases[i-2][W_INDEX].T.dot(dZ)
+        relu_d = ReLU_deriv(zAndA[i-1][Z_INDEX])
+        dZ = wb * relu_d
+
+    # First
+
+    dW = 1 / m * dZ.dot(X.T)
+    db = 1 / m * np.sum(dZ)
+    derivativeWeightsAndBiases = [[dW, db]] + derivativeWeightsAndBiases
+    return derivativeWeightsAndBiases, err
+
+
+def update_params(oldParams, dWB, alpha):
+    newParams = []
+    for i in range(len(oldParams)):
+        newW = oldParams[i][W_INDEX] - alpha * dWB[i][W_INDEX]
+        newB = oldParams[i][B_INDEX] - alpha * dWB[i][B_INDEX]
+        newParams.append([newW, newB])
+    return newParams
 
 
 # Example code from YT -----
@@ -166,16 +197,15 @@ def get_accuracy(predictions, Y):
     return np.sum(predictions == Y) / Y.size
 
 
-def gradient_descent(X, Y, params, alpha, iterations, useOneHot=True):
+def gradient_descent(X, Y, weightsAndBiases, alpha, iterations, useOneHot=True):
     x = X[0, :]
-    W1, b1, W2, b2 = params
     # TODO implement for all (remove [0])
 
-    Z1, A1, Z2, A2 = forward_prop(W1, b1, W2, b2, X)
-    dW1, db1, dW2, db2, sse = backward_prop(
-        Z1, A1, Z2, A2, W1, W2, X, Y, useOneHot)
-    W1, b1, W2, b2 = update_params(
-        W1, b1, W2, b2, dW1, db1, dW2, db2, alpha)
+    zAndA = forward_prop(weightsAndBiases, X)
+    dWB, sse = backward_prop(
+        zAndA, weightsAndBiases, X, Y, useOneHot)
+    newParams = update_params(
+        weightsAndBiases, dWB, alpha)
     if sse < 1.:
         a = 3
     #print(f'Error: {sse}')
