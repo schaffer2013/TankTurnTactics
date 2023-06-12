@@ -10,14 +10,14 @@ import GameManagerMapper
 import AutoClientManager
 import datetime
 
-NODE_COUNTS = [50, 40, 28]
+NODE_COUNTS = [150, 140, 128]
 
 HANDS_ON = False
 VISUAL = False
 EPOCH_COUNT = 1000
 
 # Grid dimensions
-GRID_DIM_X = 10
+GRID_DIM_X = 5
 GRID_DIM_Y = GRID_DIM_X  # Setting to "always square" for range normalization
 
 # This sets the WIDTH and HEIGHT of each grid location
@@ -30,7 +30,7 @@ HEIGHT = int(TOTAL_HEIGHT/GRID_DIM_Y)
 MARGIN = int(min(WIDTH, HEIGHT)/10)
 
 # Number of initial tanks
-NUM_TANKS = 10
+NUM_TANKS = 3
 
 # Create a 2 dimensional array. A two dimensional
 # array is simply a list of lists.
@@ -218,43 +218,43 @@ while epochNumber < EPOCH_COUNT or timeout or witherPercentage < 0.05:
                   (manager.getIncreaseRangePercentage()*100.0))
             print("Wither percentage: %.2f" %
                   (manager.getWitherPercentage()*100.0))
-        # See epoch trend
-        epochList.append(epochNumber)
-        witherList.append(witherPercentage)
-        # if (len(epochList) >= 3):
-        #     m, m_res, b, b_res = Lin.fit(epochList, witherList)
-        #     print("slope: %.4f +/- %.4f" % (m, m_res))
-        #     if (abs(m) < abs(m_res)):
-        #         print("insignificant")
-        #     else:
-        #         print("SIGNIFICANT")
+    # See epoch trend
+    epochList.append(epochNumber)
+    witherList.append(witherPercentage)
+    # if (len(epochList) >= 3):
+    #     m, m_res, b, b_res = Lin.fit(epochList, witherList)
+    #     print("slope: %.4f +/- %.4f" % (m, m_res))
+    #     if (abs(m) < abs(m_res)):
+    #         print("insignificant")
+    #     else:
+    #         print("SIGNIFICANT")
 
-        # After single game loop between epochs--------------
-        # Save old brain params
-        bestPerformer = autoClientManager.exportWeights()
+    # After single game loop between epochs--------------
+    # Save old brain params
+    bestPerformer = autoClientManager.exportWeights()
 
-        # Get next gen population
-        newPopulationPool = []
-        for i in range(len(manager.deadTankIndices)):
-            # Add 1 possible new gen for each tank, and one for
-            # each tank that died before it. The last tank has the
-            # most in the pool. Or just play around with the numbers.
-            newPopulationPool.extend([manager.deadTankIndices[i]] * (i+1))
+    # Get next gen population
+    newPopulationPool = []
+    for i in range(len(manager.deadTankIndices)):
+        # Add 1 possible new gen for each tank, and one for
+        # each tank that died before it. The last tank has the
+        # most in the pool. Or just play around with the numbers.
+        newPopulationPool.extend([manager.deadTankIndices[i]] * (i+1))
 
-        if not done:
-            random.shuffle(newPopulationPool)
-            newGen = newPopulationPool[:NUM_TANKS]
-            autoClientManager.reInit(newGen)
-        manager.reInit()
+    if not done:
+        random.shuffle(newPopulationPool)
+        newGen = newPopulationPool[:NUM_TANKS]
+        autoClientManager.reInit(newGen)
+    manager.reInit()
 
-        epochNumber += 1
+    epochNumber += 1
 
-        if epochNumber % 20 == 0:
-            fileHelper.fileDumpWeights(bestPerformer)
-            fileHelper.fileDumpPossibilities(autoClientManager.exportTrainingSet())
+    if epochNumber % 20 == 0:
+        fileHelper.fileDumpWeights(bestPerformer)
+        fileHelper.fileDumpPossibilities(autoClientManager.exportTrainingSet())
 
-        elapsedTime = datetime.datetime.now() - startTime
-        print(f'Elapsed time: {elapsedTime}')
+    elapsedTime = datetime.datetime.now() - startTime
+    print(f'Elapsed time: {elapsedTime}')
 
 #----------------#
 
