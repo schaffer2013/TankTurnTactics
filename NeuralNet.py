@@ -1,7 +1,7 @@
 import numpy as np
 
 # Params for randomization
-STANDARD_DEV = 0.0001
+STANDARD_DEV = 0.0005
 np.seterr(all='raise')
 
 W_INDEX = 0
@@ -205,14 +205,16 @@ def gradient_descent(X, Y, weightsAndBiases, alpha, iterations, useOneHot=True):
     x = X[0, :]
     # TODO implement for all (remove [0])
 
-    zAndA = forward_prop(weightsAndBiases, X)
-    dWB, sse = backward_prop(
-        zAndA, weightsAndBiases, X, Y, useOneHot)
-    newParams = update_params(
-        weightsAndBiases, dWB, alpha)
+    for i in range(iterations):
+        zAndA = forward_prop(weightsAndBiases, X)
+        dWB, sse = backward_prop(
+            zAndA, weightsAndBiases, X, Y, useOneHot)
+        newParams = update_params(
+            weightsAndBiases, dWB, alpha)
+        weightsAndBiases = newParams
     if sse < 1.:
         a = 3
-    #print(f'Error: {sse}')
+    # print(f'Error: {sse}')
     # if i % 10 == 0:
     #     print("Iteration: ", i)
     #     predictions = get_predictions(A2)
