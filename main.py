@@ -10,14 +10,14 @@ import GameManagerMapper
 import AutoClientManager
 import datetime
 
-NODE_COUNTS = [150, 140, 128]
+NODE_COUNTS = [20,20]
 
 HANDS_ON = False
 VISUAL = False
 EPOCH_COUNT = 1000
 
 # Grid dimensions
-GRID_DIM_X = 5
+GRID_DIM_X = 10
 GRID_DIM_Y = GRID_DIM_X  # Setting to "always square" for range normalization
 
 # This sets the WIDTH and HEIGHT of each grid location
@@ -30,7 +30,7 @@ HEIGHT = int(TOTAL_HEIGHT/GRID_DIM_Y)
 MARGIN = int(min(WIDTH, HEIGHT)/10)
 
 # Number of initial tanks
-NUM_TANKS = 3
+NUM_TANKS = 12
 
 # Create a 2 dimensional array. A two dimensional
 # array is simply a list of lists.
@@ -81,7 +81,7 @@ witherList = []
 timeout = False
 
 # while (witherPercentage > 0.001):
-while epochNumber < EPOCH_COUNT or timeout or witherPercentage < 0.05:
+while epochNumber < EPOCH_COUNT or timeout or witherPercentage < 0.0005:
     print("________")
     print(f'Epoch {epochNumber}')
     startTime = datetime.datetime.now()
@@ -241,7 +241,7 @@ while epochNumber < EPOCH_COUNT or timeout or witherPercentage < 0.05:
         # most in the pool. Or just play around with the numbers.
         newPopulationPool.extend([manager.deadTankIndices[i]] * (i+1))
 
-    if not done:
+    if done:
         random.shuffle(newPopulationPool)
         newGen = newPopulationPool[:NUM_TANKS]
         autoClientManager.reInit(newGen)

@@ -87,7 +87,7 @@ class BlindMapper:
         isValid = [None] * (self.highestCmdIndex + 1)
 
         # Can Pass
-        isValid[PASS_CMD] = True
+        isValid[PASS_CMD] = gameStatus.dimX > activeTank.actionPoints
 
         # Can Move
         isValid[MOVE_RIGHT_CMD] = gameStatus.canMoveActiveTank(1, 0)
