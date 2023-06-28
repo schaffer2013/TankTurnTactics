@@ -3,6 +3,7 @@ import os
 
 POSS_FILE_PREFIX = 'POSS-'
 BASE_FILE_PREFIX = 'BASE-'
+WEIGHTS_FOLDER = 'saved weights'
 
 
 class FileHelper:
@@ -11,18 +12,24 @@ class FileHelper:
         self.dim = dim
         self.nodeCounts = nodeCounts
 
+        isExist = os.path.exists(WEIGHTS_FOLDER)
+        if not isExist:
+            # Create a new directory because it does not exist
+            os.makedirs(WEIGHTS_FOLDER)
+            print("The new directory is created!")
+
     def getFileNameWeights(self):
         runningString = f'weights-{str(self.numTanks)}tanks-{str(self.dim)}dim'#{str(self.L1Nodes)}L1Nodes.pkl'
         for i in range(len(self.nodeCounts)):
             runningString += f'-{str(self.nodeCounts[i])}L{i}Nodes'
         runningString += '.pkl'
-        return runningString
+        return (f'{WEIGHTS_FOLDER}/{runningString}')
 
     def getFileNamePossibilities(self):
         return POSS_FILE_PREFIX + self.getFileNameWeights()
 
     def getFileNameBaseWeights(self):
-        return BASE_FILE_PREFIX + self.getFileNameWeights()
+        return (f'{WEIGHTS_FOLDER}/{BASE_FILE_PREFIX + self.getFileNameWeights()}')
 
     def fileDump(self, fileName, data):
         with open(fileName, 'wb') as file:

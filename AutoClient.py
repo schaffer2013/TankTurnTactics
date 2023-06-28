@@ -13,11 +13,11 @@ class Client:
     def makeDecision(self, gameStatus, possibleActions, fallbackAction):
         ngs = self.normalizeGameStatus(gameStatus)
         # returns actionIndex
-        actionIndex = self.brain.makeDecision(
+        _, actionIndex = self.brain.makeDecision(
             ngs, possibleActions, fallbackAction, True)
         if (actionIndex == None):
             a = 3
-        return self.brain.makeDecision(ngs, possibleActions, fallbackAction, True), ngs
+        return actionIndex, ngs
 
     def normalizeGameStatus(self, gameStatus):
         def myFunc(e):

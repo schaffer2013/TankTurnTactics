@@ -10,14 +10,14 @@ import GameManagerMapper
 import AutoClientManager
 import datetime
 
-NODE_COUNTS = [20,20]
+NODE_COUNTS = [25, 20, 16]
 
 HANDS_ON = False
 VISUAL = False
 EPOCH_COUNT = 1000
 
 # Grid dimensions
-GRID_DIM_X = 10
+GRID_DIM_X = 12
 GRID_DIM_Y = GRID_DIM_X  # Setting to "always square" for range normalization
 
 # This sets the WIDTH and HEIGHT of each grid location
@@ -30,7 +30,7 @@ HEIGHT = int(TOTAL_HEIGHT/GRID_DIM_Y)
 MARGIN = int(min(WIDTH, HEIGHT)/10)
 
 # Number of initial tanks
-NUM_TANKS = 12
+NUM_TANKS = 15
 
 # Create a 2 dimensional array. A two dimensional
 # array is simply a list of lists.
@@ -207,7 +207,8 @@ while epochNumber < EPOCH_COUNT or timeout or witherPercentage < 0.0005:
         done = done or manager.isAWin
         if manager.isAWin:
             witherPercentage = manager.getWitherPercentage()
-            print(f'Tank {manager.winningTank} wins!')
+            actionsTaken = len(autoClientManager.allClients[manager.winningTank].brain.actionsTaken)
+            print(f'Tank {manager.winningTank} wins in {actionsTaken} moves!')
             print("Move percentage: %.2f" %
                   (manager.getMovePercentage()*100.0))
             print("Shoot percentage: %.2f" %
@@ -251,7 +252,7 @@ while epochNumber < EPOCH_COUNT or timeout or witherPercentage < 0.0005:
 
     if epochNumber % 20 == 0:
         fileHelper.fileDumpWeights(bestPerformer)
-        fileHelper.fileDumpPossibilities(autoClientManager.exportTrainingSet())
+        # fileHelper.fileDumpPossibilities(autoClientManager.exportTrainingSet())
 
     elapsedTime = datetime.datetime.now() - startTime
     print(f'Elapsed time: {elapsedTime}')

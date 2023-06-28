@@ -34,23 +34,20 @@ class Brain:
         weightedActions, one_hot, actionIndex = NeuralNet.forwardPropAndOneHot(
             self.weightsAndBiases, ngs)
         if weightedDecision:
-            weightedAndPossible = []
-            for i in range(len(possibleActions)):
-                weightedAndPossible.append(
-                    possibleActions[i] * weightedActions[i])
-            s = sum(weightedAndPossible)
-            if (s <= 0.0):
-                raise Exception("This is bad")
+            # weightedAndPossible = []
+            # for i in range(len(possibleActions)):
+            #     weightedAndPossible.append(
+            #         possibleActions[i] * weightedActions[i])
+            weighted_np = np.concatenate(
+                weightedActions).ravel()
+            actionIndex = int(np.random.choice(np.arange(weighted_np.size),
+                                           p=weighted_np/weighted_np.sum()))
+            self.saveDecision(ngs, actionIndex)
+            isPossible = possibleActions[actionIndex]
+            if not isPossible:
                 actionIndex = fallbackAction
-                self.saveDecision(ngs, actionIndex)
-                return actionIndex
-            randomChoice = np.random.rand() * s
-            runningValue = 0.0
-            for i in range(len(weightedAndPossible)):
-                runningValue += weightedAndPossible[i]
-                if (runningValue) > randomChoice:
-                    self.saveDecision(ngs, i)
-                    return i
+            return isPossible, actionIndex
+
         else:
             self.saveDecision(ngs, actionIndex)
             return actionIndex
@@ -61,8 +58,10 @@ class Brain:
 
     def wiggle(self):
         for i in range(len(self.weightsAndBiases)):
-            self.weightsAndBiases[i][NeuralNet.W_INDEX] = NeuralNet.wiggleValues(self.weightsAndBiases[i][NeuralNet.W_INDEX])
-            self.weightsAndBiases[i][NeuralNet.B_INDEX] = NeuralNet.wiggleValues(self.weightsAndBiases[i][NeuralNet.B_INDEX])
+            self.weightsAndBiases[i][NeuralNet.W_INDEX] = NeuralNet.wiggleValues(
+                self.weightsAndBiases[i][NeuralNet.W_INDEX])
+            self.weightsAndBiases[i][NeuralNet.B_INDEX] = NeuralNet.wiggleValues(
+                self.weightsAndBiases[i][NeuralNet.B_INDEX])
 
     def learn(self, iterations=1):
         oldParams = self.weightsAndBiases

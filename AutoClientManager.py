@@ -3,7 +3,7 @@ import BlindClientMapper
 from AutoClient import Client
 
 # Use this to export a subset of possibilities
-CHANCE_FOR_EXAMPLE = 0.5
+CHANCE_FOR_EXAMPLE = 0.0
 
 
 class AutoClientManager:
