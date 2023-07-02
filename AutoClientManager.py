@@ -1,6 +1,7 @@
 import random
 import BlindClientMapper
 from AutoClient import Client
+from Brain import Strategy
 
 # Use this to export a subset of possibilities
 CHANCE_FOR_EXAMPLE = 0.0
@@ -61,8 +62,12 @@ class AutoClientManager:
         possibleActions = self.mapper.getActionValidations()
         activeClient = self.allClients[gameStatus.activeTankIndex]
 
+        if activeClient.brain.strategy == Strategy.STRATEGY_SIT_AND_SHOOT_ON_SIGHT:
+            fallbackAction = BlindClientMapper.PASS_CMD
+        else:
+            fallbackAction = BlindClientMapper.WITHER_CMD
         action, ngs = activeClient.makeDecision(
-            gameStatus, possibleActions, BlindClientMapper.WITHER_CMD)
+            gameStatus, possibleActions, fallbackAction)
         if (random.random() < CHANCE_FOR_EXAMPLE):
             self.trainingPossibleActions.append([ngs, possibleActions])
 

@@ -1,8 +1,6 @@
 import random
 import pygame
-import Brain
 import FileHelper
-import pickle
 import jsonpickle
 import GameManagerModule
 import ScreenHelper
@@ -236,11 +234,23 @@ while epochNumber < EPOCH_COUNT or timeout or witherPercentage < 0.0005:
 
     # Get next gen population
     newPopulationPool = []
+    foundSentinel = False
+    # Remove any duplicates.
+    res = []
+    [res.append(x) for x in manager.deadTankIndices if x not in res]
+    manager.deadTankIndices = res
     for i in range(len(manager.deadTankIndices)):
         # Add 1 possible new gen for each tank, and one for
         # each tank that died before it. The last tank has the
         # most in the pool. Or just play around with the numbers.
-        newPopulationPool.extend([manager.deadTankIndices[i]] * (i+1))
+        
+        if manager.deadTankIndices[i] == 0: #This is that sentinel guy.
+            foundSentinel = True
+        else:
+            newPopulationPool.extend([manager.deadTankIndices[i]] * (i+1))
+            if foundSentinel:
+                # If you beat the sentinel, more offspring.
+                newPopulationPool.extend([manager.deadTankIndices[i]] * (i+1))
 
     if done:
         random.shuffle(newPopulationPool)

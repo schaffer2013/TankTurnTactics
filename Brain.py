@@ -1,16 +1,18 @@
+import random
 import numpy as np
 import NeuralNet
-import copy
+import Strategy
 
 #LAYER_1_NODES = 150
 
 
 class Brain:
-    def __init__(self, numActions, numNodesInLayers=[150]):
+    def __init__(self, numActions, numNodesInLayers=[150], strategy=Strategy.STRATEGY_NO_RESTRICTIONS):
         self.numActions = numActions
         self.actionsTaken = []
         self.normGameStates = []
         self.numNodesInLayers = numNodesInLayers
+        self.strategy = strategy
         self.weightsAndBiases = []
         self.lastSse = 10 ** 15
 
@@ -27,30 +29,40 @@ class Brain:
         self.weightsAndBiases = params
 
     def makeDecision(self, ngs, possibleActions, fallbackAction, weightedDecision=False):
-        if (False):
-            allActionsPossible = [True] * len(possibleActions)
-            possibleActions = allActionsPossible
-
-        weightedActions, one_hot, actionIndex = NeuralNet.forwardPropAndOneHot(
-            self.weightsAndBiases, ngs)
-        if weightedDecision:
-            # weightedAndPossible = []
-            # for i in range(len(possibleActions)):
-            #     weightedAndPossible.append(
-            #         possibleActions[i] * weightedActions[i])
-            weighted_np = np.concatenate(
-                weightedActions).ravel()
-            actionIndex = int(np.random.choice(np.arange(weighted_np.size),
-                                           p=weighted_np/weighted_np.sum()))
-            self.saveDecision(ngs, actionIndex)
-            isPossible = possibleActions[actionIndex]
-            if not isPossible:
+        if self.strategy == Strategy.STRATEGY_NO_RESTRICTIONS:
+            weightedActions, one_hot, actionIndex = NeuralNet.forwardPropAndOneHot(
+                self.weightsAndBiases, ngs)
+            if weightedDecision:
+                # weightedAndPossible = []
+                # for i in range(len(possibleActions)):
+                #     weightedAndPossible.append(
+                #         possibleActions[i] * weightedActions[i])
+                weighted_np = np.concatenate(
+                    weightedActions).ravel()
+                actionIndex = int(np.random.choice(np.arange(weighted_np.size),
+                                                   p=weighted_np/weighted_np.sum()))
+                self.saveDecision(ngs, actionIndex)
+                isPossible = possibleActions[actionIndex]
+                if not isPossible:
+                    actionIndex = fallbackAction
+                return isPossible, actionIndex
+            else:
+                self.saveDecision(ngs, actionIndex)
+                return actionIndex
+        if self.strategy == Strategy.STRATEGY_SIT_AND_SHOOT_ON_SIGHT:
+            mask = Strategy.getMask(
+                Strategy.STRATEGY_SIT_AND_SHOOT_ON_SIGHT, len(possibleActions))
+            prune = Strategy.pruneValidActions(
+                possibleActions, Strategy.STRATEGY_SIT_AND_SHOOT_ON_SIGHT)
+            validShotCount = np.sum(prune[1:])
+            if validShotCount > 0:
+                actionIndex = np.random.choice(range(1, len(possibleActions)), p=prune[1:]/validShotCount)
+                isPossible = True
+            else:
                 actionIndex = fallbackAction
-            return isPossible, actionIndex
-
-        else:
+                isPossible = False
             self.saveDecision(ngs, actionIndex)
-            return actionIndex
+            return isPossible, actionIndex
 
     def saveDecision(self, ngs, actionIndex):
         self.normGameStates.append(ngs)

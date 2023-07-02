@@ -85,7 +85,8 @@ class GameManager:
         if (len(self.getAliveTanks()) <= 1):
             self.isAWin = True
             self.winningTank = self.activeTankIndex
-            self.deadTankIndices.append(self.winningTank)
+            if not (self.deadTankIndices[-1] == self.winningTank):
+                self.deadTankIndices.append(self.winningTank)
         return self.isAWin
 
     def increaseActiveTankIndexSub(self):

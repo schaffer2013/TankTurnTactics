@@ -8,15 +8,13 @@ from Brain import Brain
 class Client:
     def __init__(self, index, numPossibleActions, nodeCounts):
         self.index = index
-        self.brain = Brain(numPossibleActions, nodeCounts)
+        self.brain = Brain(numPossibleActions, nodeCounts, Strategy.STRATEGY_SIT_AND_SHOOT_ON_SIGHT if index == 0 else Strategy.STRATEGY_NO_RESTRICTIONS)
 
     def makeDecision(self, gameStatus, possibleActions, fallbackAction):
         ngs = self.normalizeGameStatus(gameStatus)
         # returns actionIndex
         _, actionIndex = self.brain.makeDecision(
             ngs, possibleActions, fallbackAction, True)
-        if (actionIndex == None):
-            a = 3
         return actionIndex, ngs
 
     def normalizeGameStatus(self, gameStatus):
